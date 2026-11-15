@@ -1,13 +1,13 @@
-# ĐỒ ÁN CUỐI KỲ: LẬP TRÌNH WEB (WEBPR330479)
-## ĐỀ TÀI: SHOPPING SERVICE MVC - CỬA HÀNG MUA SẮM VÀ QUẢN LÝ DANH MỤC SẢN PHẨM (SERVLET - JDBC - 3 TIER)
+# BÀI TẬP VỀ NHÀ: LẬP TRÌNH WEB (WEBPR330479)
+## BÀI THỰC HÀNH TUẦN: BTVN 09/11/2026 (SERVLET - JDBC - 3 TIER)
 **Giảng viên hướng dẫn:** ThS. Nguyễn Hữu Trung - Đại học Sư Phạm Kỹ Thuật TP.HCM (HCMUTE)  
-**Thời gian hoàn thành:** 2026
+**Thời gian thực hiện:** Buổi học 09/11/2026
 
 ---
 
-## I. TỔNG QUAN DỰ ÁN
+## I. TỔNG QUAN BÀI TẬP
 
-Dự án được xây dựng dựa trên sự phân tích và đối chiếu toàn diện từ 2 tài liệu chuẩn của giảng viên:
+Bài tập được xây dựng dựa trên sự phân tích và đối chiếu toàn diện từ 2 tài liệu chuẩn của giảng viên:
 1. **Tài liệu 1 (`14_HD_Servlet_JDBC_CRUD.pdf`):** Hướng dẫn xây dựng chức năng CRUD (Xem, Thêm, Sửa, Xóa, Tìm kiếm) cho bảng `Category` (Danh mục) sử dụng Servlet, JDBC, Upload file đa phương tiện (`@MultipartConfig`), và Servlet download ảnh (`/image?fname=...`).
 2. **Tài liệu 2 (`06_MVC_3tier.pdf`):** Kiến trúc 3 tầng (Three Tier Architecture) và mô hình MVC trong Java; thực hiện các chức năng xác thực người dùng: Đăng nhập (`LoginController`), Đăng ký (`RegisterController`), Ghi nhớ đăng nhập (`Cookie`), Điều hướng phân quyền (`WaitingController`), Đăng xuất (`LogoutController`), và Quản lý phiên (`Session`) trên thanh điều hướng (`topbar.jsp`).
 3. **Cải tiến & Hoàn thiện thực tế:**
