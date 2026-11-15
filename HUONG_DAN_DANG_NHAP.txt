@@ -1,0 +1,172 @@
+================================================================================
+   TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT TP. HỒ CHÍ MINH (HCMUTE)
+   KHOA CÔNG NGHỆ THÔNG TIN - BỘ MÔN CÔNG NGHỆ PHẦN MỀM
+   ĐỒ ÁN CUỐI KỲ: LẬP TRÌNH WEB (MÃ HỌC PHẦN: WEBPR330479)
+   GIẢNG VIÊN HƯỚNG DẪN: ThS. NGUYỄN HỮU TRUNG
+================================================================================
+   HỆ THỐNG SHOPPING SERVICE MVC - KIẾN TRÚC 3 TẦNG (SERVLET - JDBC - SQL SERVER)
+   CHỨC NĂNG XÁC THỰC BẢO MẬT: BCRYPT HASHING - PHÂN QUYỀN - CHỐNG BRUTE FORCE
+================================================================================
+
+I. HƯỚNG DẪN KHỞI CHẠY CHƯƠNG TRÌNH (HỖ TRỢ SONG SONG 2 CÁCH)
+--------------------------------------------------------------------------------
+Hệ thống hỗ trợ 2 phương thức khởi chạy song song, dùng chung 1 bộ mã nguồn và cấu hình duy nhất:
+
+CÁCH 1: KHỞI CHẠY BẰNG RUN_SERVER.BAT (GIỮ NGUYÊN HOÀN TOÀN)
+1. Thầy/Cô và người dùng chỉ cần nhấp đúp chuột vào file ở thư mục gốc:
+   -->  run_server.bat
+
+2. File chạy sẽ tự động thực hiện tất cả các bước:
+   • Tự động nhận diện thư mục dự án trên mọi ổ đĩa (D:\, C:\, E:\,...).
+   • Giải phóng cổng 8080 và 8005 nếu có tiến trình chạy ngầm để tránh xung đột cổng.
+   • Đồng bộ và giải nén bản build mới nhất của ứng dụng vào Apache Tomcat 11.
+   • Xóa sạch cache uncompress và work cache cũ để nạp mới toàn bộ view và controller.
+   • Nạp thư viện xác thực native DLL kết nối CSDL SQL Server (mssql-jdbc_auth-12.8.1.x64.dll).
+   • Khởi động máy chủ web Apache Tomcat 11.
+   • Tự động mở trình duyệt web hiển thị trang chủ mua hàng tại:
+     http://localhost:8080/ShoppingServiceMVC/home
+3. Để dừng máy chủ: Nhấn tổ hợp phím Ctrl + C tại cửa sổ CMD đang chạy máy chủ.
+
+--------------------------------------------------------------------------------
+CÁCH 2: KHỞI CHẠY TRỰC TIẾP TRONG VISUAL STUDIO CODE (VS CODE - MÀU XANH DƯƠNG)
+1. Mở thư mục dự án bằng VS Code:
+   -->  File -> Open Folder -> Chọn thư mục "BTVN_9-11"
+2. Toàn bộ mã nguồn Java chuẩn MVC được quản lý trực tiếp trong Explorer:
+   • Main/Application: vn.iotstar.Application, vn.iotstar.server.TomcatServerRunner
+   • Controllers: Admin, Auth, Common, Web
+   • DAOs / Repositories: CategoryDao, ProductDao, UserDao và DaoImpl
+   • Models / Entities: User, Category, Product, Cart, CartItem, LoginResult
+   • Services: CategoryService, ProductService, UserService và ServiceImpl
+   • Config / Connection: DBConnection (kết nối SQL Server qua Windows Auth & sa)
+   • Utils / Helpers: BCrypt, AdminSecurityFilter, CharacterEncodingFilter, Constant
+   • Views / WebApp: JSP, CSS/upload, WEB-INF/web.xml
+3. Cách chạy trong VS Code:
+   • Cách A: Nhấn F5 (hoặc chọn tab Run & Debug -> Run "ShoppingServiceMVC (F5 - Run Application)").
+   • Cách B: Mở file src/main/java/vn/iotstar/Application.java và nhấn nút "Run" CodeLens ngay trên hàm main.
+   • Cách C: Nhấn tổ hợp phím Ctrl + Shift + B để chạy Build Task (Maven Clean Package).
+4. Khi chạy từ VS Code, lớp Application.java sẽ tự động:
+   • Kiểm tra kết nối CSDL SQL Server và in xác nhận trạng thái bảng Users.
+   • Giải phóng cổng 8080 và 8005 nếu có tiến trình chạy ngầm (tránh xung đột cổng).
+   • Đồng bộ bản build WAR, nạp thư viện DLL Windows Auth và JDBC JARs.
+   • Khởi động máy chủ Apache Tomcat 11 và stream log trực tiếp ra VS Code Debug Console.
+   • Tự động mở trình duyệt web hiển thị trang chủ: http://localhost:8080/ShoppingServiceMVC/home.
+5. Để dừng máy chủ: Nhấn Shift + F5 hoặc nút Stop (■) trên thanh công cụ Debug của VS Code.
+
+
+II. ĐỊA CHỈ TRUY CẬP CÁC PHÂN HỆ
+--------------------------------------------------------------------------------
+• Trang chủ mua sắm (Khách hàng):
+  http://localhost:8080/ShoppingServiceMVC/home
+
+• Trang tất cả sản phẩm & lọc theo danh mục:
+  http://localhost:8080/ShoppingServiceMVC/products
+
+• Giỏ hàng mua sắm (Xem các món hàng đã thêm, tăng giảm số lượng, xóa):
+  http://localhost:8080/ShoppingServiceMVC/cart
+
+• Trang Đặt Hàng & Thanh Toán (Checkout):
+  http://localhost:8080/ShoppingServiceMVC/checkout
+
+• Trang đăng nhập hệ thống (Đăng nhập bằng Username hoặc Email):
+  http://localhost:8080/ShoppingServiceMVC/login
+
+• Trang đăng ký tài khoản mới (Tự động băm BCrypt, gán quyền USER):
+  http://localhost:8080/ShoppingServiceMVC/register
+
+• Trang quên mật khẩu (Sinh mã xác thực 6 số thời hạn 15 phút):
+  http://localhost:8080/ShoppingServiceMVC/forgot-password
+
+• Trang đổi mật khẩu tài khoản (Dành cho tài khoản đang đăng nhập):
+  http://localhost:8080/ShoppingServiceMVC/change-password
+
+• Bảng điều khiển quản trị (Admin Dashboard):
+  http://localhost:8080/ShoppingServiceMVC/admin/home
+
+• Quản lý CRUD Danh mục sản phẩm (Admin / Manager):
+  http://localhost:8080/ShoppingServiceMVC/admin/category/list
+
+• Quản lý Sản phẩm & Tồn kho kho hàng (Admin / Manager):
+  http://localhost:8080/ShoppingServiceMVC/admin/product/list
+
+
+III. BẢNG TÀI KHOẢN ĐĂNG NHẬP HỆ THỐNG
+--------------------------------------------------------------------------------
++---------------+--------------------------+----------+-----------------+------------------------------------------+
+| Tên đăng nhập | Email                    | Mật khẩu | Quyền hạn       | Chức năng truy cập                       |
++---------------+--------------------------+----------+-----------------+------------------------------------------+
+| admin         | admin@shoppingservice.vn | 123456   | Role 1 (Admin)  | Toàn quyền Quản trị, CRUD & Quản lý kho  |
+| trungnh       | trungnh@hcmute.edu.vn    | 123456   | Role 1 (GVHD)   | Toàn quyền Quản trị (ThS. Nguyễn Hữu Trung)|
+| manager       | manager@shoppingservice.vn|123456   | Role 2 (Manager)| Quản lý danh mục & sản phẩm              |
+| khachhang     | khachhang@gmail.com      | 123456   | Role 5 (User)   | Giao diện mua sắm; CỐ VÀO ADMIN BỊ CHẶN 403|
++---------------+--------------------------+----------+-----------------+------------------------------------------+
+* Ghi chú: Mật khẩu mặc định "123456" đã được băm bằng thuật toán an toàn BCrypt ($2a$10$...).
+
+
+IV. ĐIỂM NHẤN BẢO MẬT CHỨC NĂNG LOGIN & REGISTER (THEO TIÊU CHUẨN ĐÁNH GIÁ)
+--------------------------------------------------------------------------------
+1. Quy trình Đăng Ký Chuyên Nghiệp (REGISTER):
+   • Kiểm tra chặt chẽ đầu vào: Không bỏ trống, regex Email, regex Số điện thoại, regex Tên đăng nhập.
+   • Kiểm tra chính sách mật khẩu: Độ dài tối thiểu từ 6 ký tự trở lên.
+   • Mật khẩu xác nhận bắt buộc trùng khớp với mật khẩu đã nhập.
+   • Kiểm tra duy nhất (Unique check) cho cả Email, Username và Phone trong SQL Server.
+   • Mật khẩu được băm (hash) 100% bằng thuật toán BCrypt kèm Salt ngẫu nhiên trước khi lưu DB.
+   • BẢO MẬT PHÂN QUYỀN: Bắt buộc gán vai trò mặc định là USER (Role 5), không cho phép đăng ký quyền ADMIN.
+
+2. Quy trình Đăng Nhập Linh Hoạt & An Toàn (LOGIN):
+   • Đăng nhập được bằng cả TÊN ĐĂNG NHẬP hoặc ĐỊA CHỈ EMAIL.
+   • Xác thực mật khẩu thông qua BCrypt.checkpw (chống Rainbow table).
+   • Chống Brute-force: Tự động đếm số lần sai; nếu sai >= 5 lần, tạm khóa tài khoản 15 phút.
+   • Chống User Enumeration: Trả về thông báo lỗi chung, không để lộ thông tin tài khoản có tồn tại hay không.
+   • Chống Session Fixation: Hủy session cũ và cấp session mới khi đăng nhập thành công.
+   • Ghi nhớ đăng nhập: Cookie "remember" được gắn cờ HttpOnly=true chống mã độc JavaScript đánh cắp phiên.
+
+3. Phân Quyền Tầng Máy Chủ (Server-Side RBAC Filter):
+   • Bộ lọc `AdminSecurityFilter` bảo vệ toàn bộ URL `/admin/*`.
+   • Nếu tài khoản USER (Role 5 - khachhang) cố tình truy cập `/admin/*`, máy chủ trả về mã lỗi 403 Forbidden
+     và hiển thị trang "Truy Cập Bị Từ Chối", tuyệt đối không cho phép truy cập trái phép.
+   • Tài khoản ADMIN (admin, trungnh) được điều hướng vào bảng điều khiển quản trị `/admin/home`.
+
+4. Quên Mật Khẩu & Đổi Mật Khẩu (Forgot / Change Password):
+   • Quên mật khẩu (/forgot-password): Sinh mã xác thực Token 6 chữ số có hạn 15 phút.
+   • Đổi mật khẩu (/change-password): Bắt buộc kiểm tra mật khẩu cũ trước khi cập nhật mật khẩu mới băm BCrypt.
+
+
+V. KẾT QUẢ KIỂM THỬ TỰ ĐỘNG THỰC TẾ (23/23 TEST CASES - 100% PASS)
+--------------------------------------------------------------------------------
+Mã kiểm thử lớp: vn.iotstar.test.AuthTestSuite (Chạy trực tiếp trên database BanHang):
+
+[NHÓM REGISTER - ĐĂNG KÝ]
+1.  TC-REG-01: Đăng ký với thông tin hợp lệ                 --> [PASS] (Hash BCrypt $2a$, gán Role 5)
+2.  TC-REG-02: Đăng ký bỏ trống toàn bộ thông tin           --> [PASS] (Chặn validation rỗng)
+3.  TC-REG-03: Đăng ký thiếu họ và tên                      --> [PASS] (Báo lỗi thiếu họ tên)
+4.  TC-REG-04: Email sai định dạng (thiếu @/domain)          --> [PASS] (Bị từ chối bởi Regex)
+5.  TC-REG-05: Email đã tồn tại trong CSDL                  --> [PASS] (Phát hiện trùng lặp CSDL)
+6.  TC-REG-06: Username đã tồn tại trong CSDL               --> [PASS] (Phát hiện trùng lặp Username)
+7.  TC-REG-07: Mật khẩu quá ngắn (< 6 ký tự)                --> [PASS] (Bị chặn do độ dài < 6)
+8.  TC-REG-08: Mật khẩu không đáp ứng chính sách            --> [PASS] (Bị chặn bởi bộ lọc chính sách)
+9.  TC-REG-09: Mật khẩu xác nhận không trùng khớp           --> [PASS] (Phát hiện không khớp, chặn lưu)
+10. TC-REG-10: Đăng ký liên tiếp cùng một email             --> [PASS] (Lần 1 tạo mới, Lần 2 chặn trùng lặp)
+11. TC-REG-11: Gửi dữ liệu không hợp lệ trực tiếp API      --> [PASS] (Backend từ chối thành công)
+12. TC-REG-12: Thử tự truyền quyền ADMIN khi đăng ký        --> [PASS] (Backend cố định Role=5 USER)
+
+[NHÓM LOGIN & SECURITY - ĐĂNG NHẬP & BẢO MẬT]
+13. TC-LOG-01: Đăng nhập đúng Username / Email & Mật khẩu   --> [PASS] (Thành công cả Username và Email)
+14. TC-LOG-02: Đăng nhập sai mật khẩu                       --> [PASS] (Trả về INVALID_CREDENTIALS an toàn)
+15. TC-LOG-03: Đăng nhập tài khoản không tồn tại            --> [PASS] (Thông báo chung, chống Enumeration)
+16. TC-LOG-04: Để trống tài khoản và mật khẩu               --> [PASS] (Chặn ngay từ tầng Controller)
+17. TC-LOG-05: Đăng nhập với tài khoản bị khóa (status = 0)  --> [PASS] (Trả về ACCOUNT_LOCKED)
+18. TC-LOG-06: Đăng nhập sai liên tiếp >= 5 lần             --> [PASS] (Kích hoạt khóa 15 phút Brute-force)
+19. TC-LOG-07: USER (Role 5) truy cập chức năng ADMIN       --> [PASS] (Filter chặn tầng Server, trả mã 403)
+20. TC-LOG-08: ADMIN (Role 1) truy cập trang quản trị       --> [PASS] (Cấp quyền truy cập đầy đủ)
+21. TC-LOG-09: Đăng xuất và kiểm tra Session/Cookie         --> [PASS] (Session hủy, Cookie xóa MaxAge=0)
+22. TC-LOG-10: Truy cập trang bảo mật sau khi đăng xuất     --> [PASS] (Chuyển hướng về trang Login)
+23. TC-LOG-11: Thử sửa role ở trình duyệt để chiếm quyền     --> [PASS] (Server-side RBAC ngăn chặn tuyệt đối)
+
+TỔNG KẾT: 23/23 TEST CASES ĐẠT YÊU CẦU 100%.
+
+
+VI. CHI TIẾT TÀI LIỆU BÁO CÁO GIẢNG VIÊN
+--------------------------------------------------------------------------------
+Tài liệu báo cáo chi tiết kèm sơ đồ quy trình nghiệp vụ và phân tích kiến trúc:
+--> docs/BAO_CAO_CHUC_NANG_LOGIN_REGISTER.md
+================================================================================

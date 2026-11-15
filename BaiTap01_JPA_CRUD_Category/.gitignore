@@ -1,0 +1,26 @@
+# Environment & Sensitive configs
+.env
+*.env
+**/.env
+**/*.env
+!.env.example
+!**/.env.example
+
+# Maven build output
+target/
+*.war
+
+# IDE & Editor files
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+*.log
+
+# Windows temporary files
+Thumbs.db
+Desktop.ini
+
+# Uploaded test files
+upload/category/*.tmp

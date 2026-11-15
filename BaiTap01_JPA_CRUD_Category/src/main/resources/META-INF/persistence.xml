@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0" 
+             xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence 
+             https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+
+    <!-- Giữ đúng tên persistence-unit theo tài liệu mẫu giảng viên: jpa-hibernate-mysql -->
+    <persistence-unit name="jpa-hibernate-mysql" transaction-type="RESOURCE_LOCAL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        
+        <!-- Khai báo các Entity JPA -->
+        <class>vn.iotstar.entity.Category</class>
+        <class>vn.iotstar.entity.Video</class>
+        <class>vn.iotstar.entity.User</class>
+
+        <properties>
+            <!-- Cấu hình JDBC Driver Microsoft SQL Server -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+            
+            <!-- Chuỗi kết nối SQL Server (Database: webst2) -->
+            <!-- Hỗ trợ kết nối linh hoạt: integratedSecurity=true kết hợp fallback sa -->
+            <property name="jakarta.persistence.jdbc.url" 
+                      value="jdbc:sqlserver://localhost:1433;databaseName=webst2;integratedSecurity=true;encrypt=true;trustServerCertificate=true;" />
+            <property name="jakarta.persistence.jdbc.user" value="sa" />
+            <property name="jakarta.persistence.jdbc.password" value="1234567@a$" />
+
+            <!-- Hibernate Dialect cho SQL Server -->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
+
+            <!-- Tự động cập nhật Schema bảng (Không dùng create để tránh mất dữ liệu cũ) -->
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+
+            <!-- Hiển thị và format câu lệnh SQL trong console -->
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.highlight_sql" value="true" />
+
+            <!-- Tối ưu kết nối pool và transaction -->
+            <property name="hibernate.connection.characterEncoding" value="utf8" />
+            <property name="hibernate.connection.useUnicode" value="true" />
+        </properties>
+    </persistence-unit>
+
+</persistence>
