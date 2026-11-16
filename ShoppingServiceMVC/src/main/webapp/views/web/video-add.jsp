@@ -32,6 +32,43 @@
             color: #ffffff;
             padding: 24px 30px;
         }
+        .preview-box {
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fa;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+        .preview-box:hover {
+            border-color: #0d6efd;
+            background: #f1f7ff;
+        }
+        .poster-preview-frame {
+            width: 100%;
+            max-width: 440px;
+            aspect-ratio: 16 / 9;
+            background: #111;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+        .poster-preview-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .video-preview-player {
+            width: 100%;
+            max-height: 320px;
+            background: #000;
+            border-radius: 8px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
 <body>
@@ -67,38 +104,51 @@
             <div class="form-card">
                 <div class="form-header">
                     <h4 class="fw-bold mb-1"><i class="fa fa-cloud-upload-alt me-2"></i>Đăng Tải Video Mới</h4>
-                    <p class="mb-0 text-white-50 small">Upload file video bằng Servlet Multipart (chuẩn Jakarta EE 10)</p>
+                    <p class="mb-0 text-white-50 small">Upload file video và chọn ảnh bìa đại diện (Thumbnail) chuẩn Multipart</p>
                 </div>
 
                 <div class="p-4">
+                    <!-- Thông báo lỗi từ Server nếu có -->
                     <c:if test="${not empty error}">
                         <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
-                            <i class="fa fa-exclamation-triangle me-2"></i>
-                            <div>${error}</div>
+                            <i class="fa fa-exclamation-triangle me-2 fs-5"></i>
+                            <div><strong>Lỗi:</strong> ${error}</div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     </c:if>
 
-                    <!-- Form Upload Multipart theo đúng yêu cầu đề bài và tài liệu PDF -->
-                    <form action="${pageContext.request.contextPath}/video/add" method="post" enctype="multipart/form-data">
+                    <!-- Khung thông báo lỗi phía Client (JS Validation) -->
+                    <div id="clientAlertBox" class="alert alert-danger alert-dismissible fade show d-none align-items-center mb-3" role="alert">
+                        <i class="fa fa-exclamation-circle me-2 fs-5"></i>
+                        <span id="clientAlertMsg"></span>
+                        <button type="button" class="btn-close" type="button" onclick="hideClientAlert()"></button>
+                    </div>
+
+                    <!-- Form Upload Multipart -->
+                    <form id="formVideoAdd" action="${pageContext.request.contextPath}/video/add" method="post" enctype="multipart/form-data">
                         
-                        <!-- Tiêu đề Video -->
+                        <!-- 1. Tiêu đề Video (Bắt buộc) -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary">Tiêu đề Video <span class="text-danger">*</span></label>
+                            <label class="form-label fw-bold small text-secondary">
+                                Tiêu đề Video <span class="text-danger">*</span>
+                            </label>
                             <input type="text" 
                                    class="form-control" 
                                    name="title" 
                                    id="title" 
                                    value="<c:out value='${oldTitle}'/>" 
                                    placeholder="Nhập tiêu đề video mô tả sản phẩm, hướng dẫn,..." 
+                                   maxlength="255"
                                    required />
                         </div>
 
-                        <!-- Chọn file Video (Multipart File) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary">Chọn File Video <span class="text-danger">*</span></label>
+                        <!-- 2. Chọn File Video (Bắt buộc) & Xem trước -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-secondary">
+                                Chọn File Video <span class="text-danger">*</span>
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa fa-video"></i></span>
+                                <span class="input-group-text bg-white"><i class="fa fa-video text-primary"></i></span>
                                 <input type="file" 
                                        class="form-control" 
                                        name="videoFile" 
@@ -106,26 +156,65 @@
                                        accept="video/mp4,video/webm,video/ogg,video/quicktime" 
                                        required />
                             </div>
-                            <div class="form-text small">Định dạng hỗ trợ: MP4, WebM, OGG, MOV. Kích thước tối đa: 100MB.</div>
+                            <div class="form-text small text-muted">
+                                Hỗ trợ: <strong>MP4, WebM, OGG, MOV</strong>. Dung lượng tối đa: <strong>100MB</strong>.
+                            </div>
+
+                            <!-- Khung Xem Trước Video Sau Khi Chọn -->
+                            <div id="videoPreviewWrapper" class="preview-box mt-3 d-none">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-primary px-2 py-1"><i class="fa fa-play me-1"></i>Xem trước Video</span>
+                                    <span id="videoFileInfo" class="small text-muted fw-semibold"></span>
+                                </div>
+                                <video id="videoPreviewPlayer" class="video-preview-player" controls preload="metadata"></video>
+                                <div class="text-end mt-2">
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemoveVideo">
+                                        <i class="fa fa-trash me-1"></i>Xóa / Chọn lại video khác
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Chọn file Poster (Thumbnail) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary">Ảnh Poster Đại Diện (Thumbnail)</label>
+                        <!-- 3. Chọn File Ảnh Bìa (Thumbnail) (Không bắt buộc) & Xem trước -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-secondary">
+                                Chọn Ảnh Bìa Đại Diện (Thumbnail Video)
+                            </label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa fa-image"></i></span>
+                                <span class="input-group-text bg-white"><i class="fa fa-image text-success"></i></span>
                                 <input type="file" 
                                        class="form-control" 
                                        name="posterFile" 
                                        id="posterFile" 
-                                       accept="image/png,image/jpeg,image/webp" />
+                                       accept="image/png,image/jpeg,image/webp,image/jpg" />
                             </div>
-                            <div class="form-text small">Nếu bỏ trống, hệ thống sẽ sử dụng ảnh mặc định. Định dạng hỗ trợ: PNG, JPG, JPEG, WEBP.</div>
+                            <div class="form-text small text-muted">
+                                Tùy chọn (Nếu không chọn, hệ thống tự động gán ảnh mặc định). Định dạng: <strong>JPG, JPEG, PNG, WEBP</strong>. Tối đa: <strong>10MB</strong>.
+                            </div>
+
+                            <!-- Khung Xem Trước Ảnh Bìa Sau Khi Chọn -->
+                            <div id="posterPreviewWrapper" class="preview-box mt-3 d-none text-center">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-success px-2 py-1"><i class="fa fa-check me-1"></i>Xem trước Ảnh Bìa (Tỷ lệ 16:9)</span>
+                                    <span id="posterFileInfo" class="small text-muted fw-semibold"></span>
+                                </div>
+                                <div class="poster-preview-frame">
+                                    <img id="posterPreviewImg" src="" alt="Xem trước ảnh bìa" />
+                                </div>
+                                <div class="mt-2 d-flex justify-content-center gap-2">
+                                    <label for="posterFile" class="btn btn-outline-primary btn-sm mb-0">
+                                        <i class="fa fa-sync-alt me-1"></i>Thay đổi ảnh khác
+                                    </label>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemovePoster">
+                                        <i class="fa fa-trash me-1"></i>Xóa ảnh đã chọn
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Mô tả Video -->
+                        <!-- 4. Mô tả Video -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold small text-secondary">Mô tả chi tiết</label>
+                            <label class="form-label fw-bold small text-secondary">Mô tả chi tiết Video</label>
                             <textarea class="form-control" 
                                       name="description" 
                                       id="description" 
@@ -133,12 +222,12 @@
                                       placeholder="Mô tả thông tin chi tiết về nội dung của video..."><c:out value='${oldDescription}'/></textarea>
                         </div>
 
-                        <!-- Buttons -->
+                        <!-- Action Buttons -->
                         <div class="d-flex justify-content-end gap-2 border-top pt-3">
                             <a href="${pageContext.request.contextPath}/video" class="btn btn-outline-secondary">
                                 <i class="fa fa-times me-1"></i>Hủy bỏ
                             </a>
-                            <button type="submit" class="btn btn-primary px-4 fw-bold">
+                            <button type="submit" id="btnSubmitForm" class="btn btn-primary px-4 fw-bold">
                                 <i class="fa fa-upload me-1"></i>Đăng Tải Video
                             </button>
                         </div>
@@ -159,6 +248,187 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script xử lý Preview Video, Preview Ảnh bìa & Client-side Validation -->
+<script>
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+    const MAX_POSTER_SIZE = 10 * 1024 * 1024; // 10MB
+    const VALID_VIDEO_EXTS = ['.mp4', '.webm', '.ogg', '.mov'];
+    const VALID_POSTER_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    const clientAlertBox = document.getElementById('clientAlertBox');
+    const clientAlertMsg = document.getElementById('clientAlertMsg');
+
+    function showClientAlert(message) {
+        clientAlertMsg.innerText = message;
+        clientAlertBox.classList.remove('d-none');
+        clientAlertBox.classList.add('d-flex');
+        window.scrollTo({ top: clientAlertBox.offsetTop - 80, behavior: 'smooth' });
+    }
+
+    function hideClientAlert() {
+        clientAlertBox.classList.add('d-none');
+        clientAlertBox.classList.remove('d-flex');
+    }
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function getFileExtension(filename) {
+        const dotIndex = filename.lastIndexOf('.');
+        return dotIndex !== -1 ? filename.substring(dotIndex).toLowerCase() : '';
+    }
+
+    // ====== XỬ LÝ PREVIEW VIDEO ======
+    const videoFileInput = document.getElementById('videoFile');
+    const videoPreviewWrapper = document.getElementById('videoPreviewWrapper');
+    const videoPreviewPlayer = document.getElementById('videoPreviewPlayer');
+    const videoFileInfo = document.getElementById('videoFileInfo');
+    const btnRemoveVideo = document.getElementById('btnRemoveVideo');
+
+    let currentVideoBlobUrl = null;
+
+    videoFileInput.addEventListener('change', function() {
+        hideClientAlert();
+        const file = this.files[0];
+        if (!file) {
+            clearVideoPreview();
+            return;
+        }
+
+        const ext = getFileExtension(file.name);
+        if (!VALID_VIDEO_EXTS.includes(ext)) {
+            showClientAlert("Định dạng file video '" + file.name + "' không hợp lệ! Vui lòng chỉ chọn: " + VALID_VIDEO_EXTS.join(', '));
+            clearVideoPreview();
+            return;
+        }
+
+        if (file.size > MAX_VIDEO_SIZE) {
+            showClientAlert("File video vượt quá dung lượng tối đa 100MB (" + formatBytes(file.size) + ")!");
+            clearVideoPreview();
+            return;
+        }
+
+        if (currentVideoBlobUrl) {
+            URL.revokeObjectURL(currentVideoBlobUrl);
+        }
+
+        currentVideoBlobUrl = URL.createObjectURL(file);
+        videoPreviewPlayer.src = currentVideoBlobUrl;
+        videoFileInfo.innerText = file.name + ' (' + formatBytes(file.size) + ')';
+        videoPreviewWrapper.classList.remove('d-none');
+    });
+
+    btnRemoveVideo.addEventListener('click', function() {
+        clearVideoPreview();
+    });
+
+    function clearVideoPreview() {
+        videoFileInput.value = '';
+        if (currentVideoBlobUrl) {
+            URL.revokeObjectURL(currentVideoBlobUrl);
+            currentVideoBlobUrl = null;
+        }
+        videoPreviewPlayer.removeAttribute('src');
+        videoPreviewPlayer.load();
+        videoFileInfo.innerText = '';
+        videoPreviewWrapper.classList.add('d-none');
+    }
+
+    // ====== XỬ LÝ PREVIEW ẢNH BÌA (POSTER) ======
+    const posterFileInput = document.getElementById('posterFile');
+    const posterPreviewWrapper = document.getElementById('posterPreviewWrapper');
+    const posterPreviewImg = document.getElementById('posterPreviewImg');
+    const posterFileInfo = document.getElementById('posterFileInfo');
+    const btnRemovePoster = document.getElementById('btnRemovePoster');
+
+    let currentPosterBlobUrl = null;
+
+    posterFileInput.addEventListener('change', function() {
+        hideClientAlert();
+        const file = this.files[0];
+        if (!file) {
+            clearPosterPreview();
+            return;
+        }
+
+        const ext = getFileExtension(file.name);
+        if (!VALID_POSTER_EXTS.includes(ext)) {
+            showClientAlert("Định dạng ảnh bìa '" + file.name + "' không hợp lệ! Vui lòng chỉ chọn ảnh: " + VALID_POSTER_EXTS.join(', '));
+            clearPosterPreview();
+            return;
+        }
+
+        if (file.size > MAX_POSTER_SIZE) {
+            showClientAlert("File ảnh bìa vượt quá dung lượng tối đa 10MB (" + formatBytes(file.size) + ")!");
+            clearPosterPreview();
+            return;
+        }
+
+        if (currentPosterBlobUrl) {
+            URL.revokeObjectURL(currentPosterBlobUrl);
+        }
+
+        currentPosterBlobUrl = URL.createObjectURL(file);
+        posterPreviewImg.src = currentPosterBlobUrl;
+        posterFileInfo.innerText = file.name + ' (' + formatBytes(file.size) + ')';
+        posterPreviewWrapper.classList.remove('d-none');
+    });
+
+    btnRemovePoster.addEventListener('click', function() {
+        clearPosterPreview();
+    });
+
+    function clearPosterPreview() {
+        posterFileInput.value = '';
+        if (currentPosterBlobUrl) {
+            URL.revokeObjectURL(currentPosterBlobUrl);
+            currentPosterBlobUrl = null;
+        }
+        posterPreviewImg.removeAttribute('src');
+        posterFileInfo.innerText = '';
+        posterPreviewWrapper.classList.add('d-none');
+    }
+
+    // ====== VALIDATE TRƯỚC KHI SUBMIT FORM ======
+    document.getElementById('formVideoAdd').addEventListener('submit', function(e) {
+        const titleVal = document.getElementById('title').value.trim();
+        if (!titleVal) {
+            e.preventDefault();
+            showClientAlert('Vui lòng nhập tiêu đề cho video!');
+            return;
+        }
+
+        if (!videoFileInput.files || videoFileInput.files.length === 0) {
+            e.preventDefault();
+            showClientAlert('Vui lòng chọn file video cần tải lên!');
+            return;
+        }
+
+        const vFile = videoFileInput.files[0];
+        const vExt = getFileExtension(vFile.name);
+        if (!VALID_VIDEO_EXTS.includes(vExt) || vFile.size > MAX_VIDEO_SIZE) {
+            e.preventDefault();
+            showClientAlert('File video không hợp lệ về định dạng hoặc vượt quá 100MB!');
+            return;
+        }
+
+        if (posterFileInput.files && posterFileInput.files.length > 0) {
+            const pFile = posterFileInput.files[0];
+            const pExt = getFileExtension(pFile.name);
+            if (!VALID_POSTER_EXTS.includes(pExt) || pFile.size > MAX_POSTER_SIZE) {
+                e.preventDefault();
+                showClientAlert('File ảnh bìa không hợp lệ về định dạng hoặc vượt quá 10MB!');
+                return;
+            }
+        }
+    });
+</script>
 
 </body>
 </html>

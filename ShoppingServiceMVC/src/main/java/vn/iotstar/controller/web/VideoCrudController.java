@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
@@ -22,14 +24,16 @@ import vn.iotstar.util.Constant;
 
 /**
  * Controller xử lý đầy đủ nghiệp vụ CRUD Video và Upload File bằng Multipart Servlet chuẩn Jakarta
+ * Hỗ trợ upload đồng thời Video và Ảnh Bìa (Thumbnail), kiểm tra định dạng & dung lượng,
+ * lưu trữ vật lý độc lập và cập nhật cơ sở dữ liệu.
  * URLs: /video/add, /video/edit, /video/delete
  */
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = {"/video/add", "/video/edit", "/video/delete"})
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 2,       // 2MB (ngưỡng lưu bộ nhớ)
+    fileSizeThreshold = 1024 * 1024 * 2,       // 2MB (ngưỡng lưu bộ nhớ tạm)
     maxFileSize = 1024 * 1024 * 100,          // 100MB (kích thước tối đa file video)
-    maxRequestSize = 1024 * 1024 * 110        // 110MB (tổng kích thước request)
+    maxRequestSize = 1024 * 1024 * 115        // 115MB (tổng kích thước request bao gồm cả video và ảnh)
 )
 public class VideoCrudController extends HttpServlet {
 
@@ -84,7 +88,7 @@ public class VideoCrudController extends HttpServlet {
         }
     }
 
-    // ================= XỬ LÝ CREATE (THÊM VIDEO) =================
+    // ================= XỬ LÝ CREATE (THÊM VIDEO MỚI) =================
     private void handlePostAdd(HttpServletRequest req, HttpServletResponse resp, User currentUser)
             throws ServletException, IOException {
         String title = req.getParameter("title");
@@ -100,10 +104,24 @@ public class VideoCrudController extends HttpServlet {
             return;
         }
 
-        // 2. Nhận file Video qua Multipart
-        Part videoPart = req.getPart("videoFile");
+        // 2. Nhận file Video qua Multipart (Bắt buộc)
+        Part videoPart = null;
+        try {
+            videoPart = req.getPart("videoFile");
+        } catch (Exception e) {
+            req.setAttribute("error", "Lỗi đọc file video tải lên: " + e.getMessage());
+            req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
+            return;
+        }
+
         if (videoPart == null || videoPart.getSize() <= 0) {
             req.setAttribute("error", "Vui lòng chọn file video cần đăng tải!");
+            req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
+            return;
+        }
+
+        if (videoPart.getSize() > 100 * 1024 * 1024L) {
+            req.setAttribute("error", "Dung lượng file video vượt quá giới hạn cho phép (Tối đa 100MB)!");
             req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
             return;
         }
@@ -111,28 +129,55 @@ public class VideoCrudController extends HttpServlet {
         String originalVideoName = getFileName(videoPart);
         String videoExt = getFileExtension(originalVideoName);
         if (!ALLOWED_VIDEO_EXTS.contains(videoExt.toLowerCase())) {
-            req.setAttribute("error", "Định dạng file video không hợp lệ! Chỉ chấp nhận: " + ALLOWED_VIDEO_EXTS);
+            req.setAttribute("error", "Định dạng file video không hợp lệ! Hệ thống chỉ hỗ trợ MP4, WebM, OGG, MOV.");
             req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
             return;
         }
 
-        // Lưu file video an toàn, chống ghi đè bằng UUID
-        String savedVideoFileName = "vid_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + videoExt;
-        savePartToFile(videoPart, savedVideoFileName, "video");
-
-        // 3. Nhận file Poster (Thumbnail) nếu có
-        Part posterPart = req.getPart("posterFile");
-        String savedPosterFileName = "cat_dientu.png"; // Mặc định nếu không upload
-        if (posterPart != null && posterPart.getSize() > 0) {
-            String origPosterName = getFileName(posterPart);
-            String posterExt = getFileExtension(origPosterName);
-            if (ALLOWED_IMAGE_EXTS.contains(posterExt.toLowerCase())) {
-                savedPosterFileName = "poster_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + posterExt;
-                savePartToFile(posterPart, savedPosterFileName, "video");
-            }
+        // 3. Nhận file Ảnh Bìa (Poster/Thumbnail) nếu người dùng chọn
+        Part posterPart = null;
+        try {
+            posterPart = req.getPart("posterFile");
+        } catch (Exception ignored) {
         }
 
-        // 4. Lưu đối tượng Video vào Database
+        String savedPosterFileName = "cat_dientu.png"; // Mặc định nếu người dùng không chọn ảnh
+        if (posterPart != null && posterPart.getSize() > 0) {
+            // Kiểm tra dung lượng ảnh bìa (tối đa 10MB)
+            if (posterPart.getSize() > 10 * 1024 * 1024L) {
+                req.setAttribute("error", "Dung lượng ảnh bìa vượt quá giới hạn cho phép (Tối đa 10MB)!");
+                req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
+                return;
+            }
+
+            String origPosterName = getFileName(posterPart);
+            String posterExt = getFileExtension(origPosterName);
+
+            // Kiểm tra định dạng đuôi file ảnh
+            if (!ALLOWED_IMAGE_EXTS.contains(posterExt.toLowerCase())) {
+                req.setAttribute("error", "Định dạng ảnh bìa không hợp lệ! Hệ thống chỉ hỗ trợ JPG, JPEG, PNG, WEBP.");
+                req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
+                return;
+            }
+
+            // Kiểm tra MIME type chống giả mạo file
+            String mimeType = posterPart.getContentType();
+            if (mimeType != null && !mimeType.toLowerCase().startsWith("image/")) {
+                req.setAttribute("error", "Tập tin ảnh bìa không hợp lệ (Không phải định dạng hình ảnh)!");
+                req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
+                return;
+            }
+
+            // Tạo tên file duy nhất chống trùng lặp và ghi đè
+            savedPosterFileName = "poster_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + posterExt.toLowerCase();
+            savePartToFile(posterPart, savedPosterFileName, "video", req);
+        }
+
+        // 4. Lưu file video vật lý vào thư mục upload/video
+        String savedVideoFileName = "vid_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + videoExt.toLowerCase();
+        savePartToFile(videoPart, savedVideoFileName, "video", req);
+
+        // 5. Lưu đối tượng Video vào Database
         String videoId = "VID" + System.currentTimeMillis();
         Video newVideo = new Video();
         newVideo.setVideoId(videoId);
@@ -210,28 +255,83 @@ public class VideoCrudController extends HttpServlet {
         existingVideo.setDescription(description != null ? description.trim() : "");
         existingVideo.setActive("1".equals(activeStr) ? 1 : 0);
 
-        // Kiểm tra nếu có upload file video mới thay thế
-        Part videoPart = req.getPart("videoFile");
-        if (videoPart != null && videoPart.getSize() > 0) {
-            String origName = getFileName(videoPart);
-            String ext = getFileExtension(origName);
-            if (ALLOWED_VIDEO_EXTS.contains(ext.toLowerCase())) {
-                String newFileName = "vid_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + ext;
-                savePartToFile(videoPart, newFileName, "video");
-                existingVideo.setVideoUrl(newFileName);
-            }
+        // 1. Kiểm tra nếu có upload ảnh poster mới thay thế
+        Part posterPart = null;
+        try {
+            posterPart = req.getPart("posterFile");
+        } catch (Exception ignored) {
         }
 
-        // Kiểm tra nếu có upload poster mới thay thế
-        Part posterPart = req.getPart("posterFile");
         if (posterPart != null && posterPart.getSize() > 0) {
-            String origPoster = getFileName(posterPart);
-            String ext = getFileExtension(origPoster);
-            if (ALLOWED_IMAGE_EXTS.contains(ext.toLowerCase())) {
-                String newPosterName = "poster_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + ext;
-                savePartToFile(posterPart, newPosterName, "video");
-                existingVideo.setPoster(newPosterName);
+            if (posterPart.getSize() > 10 * 1024 * 1024L) {
+                req.setAttribute("error", "Dung lượng ảnh bìa mới không được vượt quá 10MB!");
+                req.setAttribute("video", existingVideo);
+                req.getRequestDispatcher("/views/web/video-edit.jsp").forward(req, resp);
+                return;
             }
+
+            String origPoster = getFileName(posterPart);
+            String posterExt = getFileExtension(origPoster);
+
+            if (!ALLOWED_IMAGE_EXTS.contains(posterExt.toLowerCase())) {
+                req.setAttribute("error", "Định dạng file ảnh bìa không hợp lệ! Hệ thống chỉ hỗ trợ JPG, JPEG, PNG, WEBP.");
+                req.setAttribute("video", existingVideo);
+                req.getRequestDispatcher("/views/web/video-edit.jsp").forward(req, resp);
+                return;
+            }
+
+            String mimeType = posterPart.getContentType();
+            if (mimeType != null && !mimeType.toLowerCase().startsWith("image/")) {
+                req.setAttribute("error", "Tập tin ảnh bìa mới không hợp lệ!");
+                req.setAttribute("video", existingVideo);
+                req.getRequestDispatcher("/views/web/video-edit.jsp").forward(req, resp);
+                return;
+            }
+
+            // Xóa file ảnh cũ nếu là ảnh do hệ thống tạo (bắt đầu bằng poster_)
+            String oldPoster = existingVideo.getPoster();
+            if (oldPoster != null && oldPoster.startsWith("poster_")) {
+                deletePhysicalFile(oldPoster, "video");
+            }
+
+            String newPosterName = "poster_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + posterExt.toLowerCase();
+            savePartToFile(posterPart, newPosterName, "video", req);
+            existingVideo.setPoster(newPosterName);
+        }
+
+        // 2. Kiểm tra nếu có upload file video mới thay thế
+        Part videoPart = null;
+        try {
+            videoPart = req.getPart("videoFile");
+        } catch (Exception ignored) {
+        }
+
+        if (videoPart != null && videoPart.getSize() > 0) {
+            if (videoPart.getSize() > 100 * 1024 * 1024L) {
+                req.setAttribute("error", "Dung lượng file video mới vượt quá giới hạn cho phép (Tối đa 100MB)!");
+                req.setAttribute("video", existingVideo);
+                req.getRequestDispatcher("/views/web/video-edit.jsp").forward(req, resp);
+                return;
+            }
+
+            String origName = getFileName(videoPart);
+            String ext = getFileExtension(origName);
+            if (!ALLOWED_VIDEO_EXTS.contains(ext.toLowerCase())) {
+                req.setAttribute("error", "Định dạng file video mới không hợp lệ! Chỉ chấp nhận: " + ALLOWED_VIDEO_EXTS);
+                req.setAttribute("video", existingVideo);
+                req.getRequestDispatcher("/views/web/video-edit.jsp").forward(req, resp);
+                return;
+            }
+
+            // Xóa file video cũ nếu do hệ thống tạo (bắt đầu bằng vid_)
+            String oldVideoUrl = existingVideo.getVideoUrl();
+            if (oldVideoUrl != null && oldVideoUrl.startsWith("vid_")) {
+                deletePhysicalFile(oldVideoUrl, "video");
+            }
+
+            String newFileName = "vid_" + UUID.randomUUID().toString().substring(0, 8) + "_" + System.currentTimeMillis() + ext.toLowerCase();
+            savePartToFile(videoPart, newFileName, "video", req);
+            existingVideo.setVideoUrl(newFileName);
         }
 
         videoService.update(existingVideo);
@@ -248,16 +348,26 @@ public class VideoCrudController extends HttpServlet {
             return;
         }
 
+        Video video = videoService.findById(videoId.trim());
         boolean success = videoService.delete(videoId.trim(), currentUser.getId(), currentUser.canAccessAdmin());
 
         if (success) {
+            // Dọn dẹp tài nguyên vật lý trên ổ đĩa
+            if (video != null) {
+                if (video.getPoster() != null && video.getPoster().startsWith("poster_")) {
+                    deletePhysicalFile(video.getPoster(), "video");
+                }
+                if (video.getVideoUrl() != null && video.getVideoUrl().startsWith("vid_")) {
+                    deletePhysicalFile(video.getVideoUrl(), "video");
+                }
+            }
             resp.sendRedirect(req.getContextPath() + "/video?alert=delete_success");
         } else {
             resp.sendRedirect(req.getContextPath() + "/video?alert=unauthorized");
         }
     }
 
-    // ================= TIỆN ÍCH FILE MULTIPART =================
+    // ================= TIỆN ÍCH FILE MULTIPART & LƯU TRỮ =================
     private String getFileName(Part part) {
         String submitted = part.getSubmittedFileName();
         if (submitted != null && !submitted.trim().isEmpty()) {
@@ -278,7 +388,8 @@ public class VideoCrudController extends HttpServlet {
         return (lastIndex != -1) ? fileName.substring(lastIndex) : "";
     }
 
-    private void savePartToFile(Part part, String fileName, String subFolder) throws IOException {
+    private void savePartToFile(Part part, String fileName, String subFolder, HttpServletRequest req) throws IOException {
+        // 1. Lưu vào thư mục cấu hình Constant.UPLOAD_DIR
         String uploadDirStr = Constant.UPLOAD_DIR + File.separator + subFolder;
         File uploadDir = new File(uploadDirStr);
         if (!uploadDir.exists()) {
@@ -286,5 +397,29 @@ public class VideoCrudController extends HttpServlet {
         }
         File targetFile = new File(uploadDir, fileName);
         part.write(targetFile.getAbsolutePath());
+
+        // 2. Đồng thời copy vào thư mục webapp thực tế nếu tồn tại để container phục vụ ngay
+        try {
+            String realPath = req.getServletContext().getRealPath("/upload/" + subFolder);
+            if (realPath != null) {
+                File realDir = new File(realPath);
+                if (!realDir.exists()) {
+                    realDir.mkdirs();
+                }
+                File realTarget = new File(realDir, fileName);
+                Files.copy(targetFile.toPath(), realTarget.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void deletePhysicalFile(String fileName, String subFolder) {
+        try {
+            File f1 = new File(Constant.UPLOAD_DIR + File.separator + subFolder + File.separator + fileName);
+            if (f1.exists() && f1.isFile()) {
+                f1.delete();
+            }
+        } catch (Exception ignored) {
+        }
     }
 }

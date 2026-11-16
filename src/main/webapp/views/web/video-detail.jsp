@@ -52,9 +52,10 @@
             color: #0d6efd;
         }
         .side-video-thumb {
-            width: 120px;
-            height: 75px;
+            width: 128px;
+            aspect-ratio: 16 / 9;
             object-fit: cover;
+            border-radius: 4px;
             flex-shrink: 0;
             background: #000;
         }

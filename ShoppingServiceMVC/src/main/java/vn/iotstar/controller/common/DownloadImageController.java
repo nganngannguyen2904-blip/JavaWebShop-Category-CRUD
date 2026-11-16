@@ -64,8 +64,8 @@ public class DownloadImageController extends HttpServlet {
     }
 
     private File findImageFile(HttpServletRequest req, String fileName) {
-        // 1. Thư mục Constant.UPLOAD_DIR
-        String[] subDirs = {"/product/", "/category/", "/", ""};
+        // 1. Thư mục Constant.UPLOAD_DIR (hỗ trợ đầy đủ video poster, product, category)
+        String[] subDirs = {"/video/", "/product/", "/category/", "/", ""};
         for (String sub : subDirs) {
             File f = new File(Constant.UPLOAD_DIR + sub + fileName);
             if (f.exists() && f.isFile()) {
@@ -75,6 +75,8 @@ public class DownloadImageController extends HttpServlet {
 
         // 2. Thư mục static images và resource path
         String[] staticPaths = {
+            "upload/video/" + fileName,
+            "src/main/webapp/upload/video/" + fileName,
             "upload/product/" + fileName,
             "src/main/webapp/upload/product/" + fileName,
             "src/main/resources/static/images/products/" + fileName,
