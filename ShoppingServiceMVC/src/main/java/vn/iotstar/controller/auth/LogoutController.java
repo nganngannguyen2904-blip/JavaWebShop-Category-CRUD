@@ -10,6 +10,7 @@ import java.io.IOException;
 /**
  * Controller xử lý đăng xuất an toàn
  * URL: /logout
+ * Hủy toàn bộ Session, thu hồi Cookie Remember Me và vô hiệu hóa cache trình duyệt
  */
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/logout")
@@ -39,7 +40,12 @@ public class LogoutController extends HttpServlet {
             }
         }
 
-        // 3. Chuyển hướng về trang đăng nhập kèm thông báo
+        // 3. Thiết lập Header chống lưu cache trình duyệt để không thể back lại xem trang cũ
+        resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        resp.setHeader("Pragma", "no-cache");
+        resp.setDateHeader("Expires", 0);
+
+        // 4. Chuyển hướng về trang đăng nhập kèm thông báo
         resp.sendRedirect(req.getContextPath() + "/login?logout=1");
     }
 

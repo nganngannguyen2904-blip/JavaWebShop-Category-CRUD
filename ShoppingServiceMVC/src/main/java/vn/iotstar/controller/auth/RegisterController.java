@@ -3,23 +3,31 @@ package vn.iotstar.controller.auth;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import vn.iotstar.model.User;
+import vn.iotstar.service.EmailService;
 import vn.iotstar.service.UserService;
 import vn.iotstar.service.impl.UserServiceImpl;
+import vn.iotstar.util.BCrypt;
 import vn.iotstar.util.Constant;
+import vn.iotstar.util.OtpManager;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.sql.Date;
 import java.util.regex.Pattern;
 
 /**
- * Controller xử lý chức năng đăng ký tài khoản khách hàng
+ * Controller xử lý chức năng đăng ký tài khoản khách hàng kèm mã xác thực OTP qua email
  * URL: /register
- * Đáp ứng đầy đủ quy chuẩn nghiệp vụ thực tế và an toàn thông tin
+ * Đáp ứng đầy đủ quy chuẩn nghiệp vụ thực tế, mã hóa mật khẩu BCrypt và kích hoạt OTP
  */
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/register")
 public class RegisterController extends HttpServlet {
 
     private final UserService userService = new UserServiceImpl();
+    private final EmailService emailService = EmailService.getInstance();
 
     // Biểu thức chính quy kiểm tra định dạng
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
@@ -133,13 +141,44 @@ public class RegisterController extends HttpServlet {
             return;
         }
 
-        // 10. Tiến hành đăng ký (Backend cố định role = 5 USER, băm BCrypt an toàn)
-        boolean isSuccess = userService.register(cleanUsername, password, cleanEmail, cleanFullname, cleanPhone);
+        // 10. Kiểm tra cooldown gửi lại OTP nếu có phiên cũ đang chờ
+        long cooldown = OtpManager.getRemainingCooldownSeconds(cleanEmail);
+        if (cooldown > 0) {
+            sendError(req, resp, "Thao tác quá nhanh! Vui lòng đợi " + cooldown + " giây trước khi đăng ký lại.");
+            return;
+        }
 
-        if (isSuccess) {
-            resp.sendRedirect(req.getContextPath() + "/login?registered=1");
-        } else {
-            sendError(req, resp, "Có lỗi xảy ra trong quá trình lưu dữ liệu. Vui lòng thử lại!");
+        // 11. Chuẩn bị đối tượng User tạm thời (chưa kích hoạt, băm BCrypt mật khẩu)
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt(10));
+        User pendingUser = new User();
+        pendingUser.setEmail(cleanEmail);
+        pendingUser.setUserName(cleanUsername);
+        pendingUser.setFullName(cleanFullname);
+        pendingUser.setPassWord(hashedPassword);
+        pendingUser.setAvatar("avata.png");
+        pendingUser.setRoleid(Constant.ROLE_USER);
+        pendingUser.setPhone(cleanPhone);
+        pendingUser.setStatus(1); // Sẽ được kích hoạt khi xác minh OTP
+        pendingUser.setFailedAttempts(0);
+        pendingUser.setCreatedDate(new Date(System.currentTimeMillis()));
+
+        try {
+            // 12. Sinh mã OTP 6 chữ số ngẫu nhiên
+            String otp = OtpManager.generateOtp();
+
+            // 13. Lưu phiên OTP với mục đích "REGISTER" và dữ liệu user chờ kích hoạt
+            OtpManager.createOtpSession(cleanEmail, otp, "REGISTER", pendingUser);
+
+            // 14. Gửi email xác thực OTP qua Gmail SMTP
+            emailService.sendOtpEmail(cleanEmail, cleanFullname, otp, "KÍCH HOẠT TÀI KHOẢN MỚI");
+
+            // 15. Chuyển hướng người dùng sang trang xác minh OTP
+            resp.sendRedirect(req.getContextPath() + "/verify-otp?email=" 
+                    + URLEncoder.encode(cleanEmail, StandardCharsets.UTF_8) + "&purpose=REGISTER");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendError(req, resp, "Không thể gửi email OTP: " + e.getMessage() + ". Vui lòng kiểm tra lại cấu hình email!");
         }
     }
 

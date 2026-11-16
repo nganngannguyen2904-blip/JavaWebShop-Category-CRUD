@@ -131,7 +131,7 @@ public class LoginController extends HttpServlet {
                 break;
 
             case ACCOUNT_LOCKED:
-                req.setAttribute("alert", "Tài khoản của bạn đã bị khóa bởi Quản trị viên. Vui lòng liên hệ hỗ trợ!");
+                req.setAttribute("alert", "Tài khoản của bạn chưa được kích hoạt hoặc đã bị khóa bởi Quản trị viên!");
                 req.setAttribute("alertType", "danger");
                 req.setAttribute("oldUsername", usernameOrEmail.trim());
                 req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);

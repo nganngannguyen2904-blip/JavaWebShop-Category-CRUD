@@ -9,6 +9,10 @@
 # Maven output
 target/
 *.war
+maven/
+
+# Compiled class files
+*.class
 
 # IDE files
 .vscode/
