@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -142,6 +143,72 @@
             padding: 45px 0 20px 0;
             margin-top: 60px;
         }
+        /* Style 10 Video mới nhất */
+        .home-video-card {
+            border: 1px solid #eef0f2;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .home-video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.15);
+            border-color: #b6d4fe;
+        }
+        .home-video-thumb-wrap {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            background-color: #000;
+            overflow: hidden;
+            display: block;
+        }
+        .home-video-thumb {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .home-video-card:hover .home-video-thumb {
+            transform: scale(1.06);
+        }
+        .home-play-badge {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            background: rgba(13, 110, 253, 0.85);
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+        .home-video-card:hover .home-play-badge {
+            background: #0d6efd;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+        .home-video-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #212529;
+            text-decoration: none;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: color 0.2s ease;
+        }
+        .home-video-title:hover {
+            color: #0d6efd;
+        }
     </style>
 </head>
 <body>
@@ -169,6 +236,11 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link fw-semibold" href="#categoriesSection">Danh mục</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold text-danger" href="${pageContext.request.contextPath}/video">
+                        <i class="fa fa-play-circle me-1"></i>Video Đa Phương Tiện
+                    </a>
                 </li>
                 <c:if test="${sessionScope.account != null && (sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2)}">
                     <li class="nav-item">
@@ -209,6 +281,7 @@
                                 <c:if test="${sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2}">
                                     <li><a class="dropdown-item text-danger fw-semibold" href="${pageContext.request.contextPath}/admin/home"><i class="fa fa-cogs me-2"></i>Trang Quản Trị</a></li>
                                 </c:if>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/video"><i class="fa fa-video me-2 text-primary"></i>Video của tôi</a></li>
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/change-password"><i class="fa fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger fw-semibold" href="${pageContext.request.contextPath}/logout"><i class="fa fa-sign-out me-2"></i>Đăng xuất</a></li>
@@ -371,7 +444,62 @@
     </section>
 </c:if>
 
-<!-- 6. Footer -->
+<!-- 6. 10 Video Mới Nhất (Theo yêu cầu đề bài Bài tập 02) -->
+<c:if test="${latestVideos != null && !latestVideos.isEmpty()}">
+    <section class="container mb-5" id="videosSection">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    <i class="fa fa-play-circle text-danger me-2"></i>10 Video Mới Nhất
+                </h3>
+                <p class="text-muted mb-0">Các video mới nhất được người dùng đăng tải (Sắp xếp theo ngày đăng giảm dần)</p>
+            </div>
+            <a href="${pageContext.request.contextPath}/video" class="btn btn-sm btn-outline-primary fw-semibold">
+                Xem tất cả video <i class="fa fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
+            <c:forEach items="${latestVideos}" var="v">
+                <div class="col">
+                    <div class="home-video-card">
+                        <!-- Poster Thumbnail & Play Link -->
+                        <a href="${pageContext.request.contextPath}/video/detail?id=${v.videoId}" class="home-video-thumb-wrap">
+                            <c:choose>
+                                <c:when test="${not empty v.poster}">
+                                    <img src="${pageContext.request.contextPath}/image?fname=${v.poster}" alt="${v.title}" class="home-video-thumb" onerror="this.src='${pageContext.request.contextPath}/image?fname=cat_dientu.png';">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="${pageContext.request.contextPath}/image?fname=cat_dientu.png" alt="${v.title}" class="home-video-thumb">
+                                </c:otherwise>
+                            </c:choose>
+                            <div class="home-play-badge">
+                                <i class="fa fa-play"></i>
+                            </div>
+                        </a>
+
+                        <!-- Card Body -->
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <!-- Tiêu đề Video (Bấm được và mở trang chi tiết để phát video theo yêu cầu đề bài) -->
+                            <h6 class="mb-2">
+                                <a href="${pageContext.request.contextPath}/video/detail?id=${v.videoId}" class="home-video-title" title="${v.title}">
+                                    ${v.title}
+                                </a>
+                            </h6>
+
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-muted" style="font-size: 0.78rem;">
+                                <span><i class="fa fa-eye me-1 text-primary"></i>${v.views} xem</span>
+                                <span><fmt:formatDate value="${v.uploadDate}" pattern="dd/MM/yyyy" /></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </c:forEach>
+        </div>
+    </section>
+</c:if>
+
+<!-- 7. Footer -->
 <footer class="footer">
     <div class="container">
         <div class="row g-4">

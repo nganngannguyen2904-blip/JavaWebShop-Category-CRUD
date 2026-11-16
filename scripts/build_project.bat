@@ -13,7 +13,9 @@ if not defined JAVA_HOME (
 )
 
 if not defined MAVEN_CMD (
-    if exist "%USERPROFILE%\.m2\wrapper\dists\apache-maven-3.10.0\2aaba761688b1a6ea5a46e7e5f4d5406ed7a75ee8da95e5e3079863a23461c9b\bin\mvn.cmd" (
+    if exist "%~dp0..\maven\bin\mvn.cmd" (
+        set "MAVEN_CMD=%~dp0..\maven\bin\mvn.cmd"
+    ) else if exist "%USERPROFILE%\.m2\wrapper\dists\apache-maven-3.10.0\2aaba761688b1a6ea5a46e7e5f4d5406ed7a75ee8da95e5e3079863a23461c9b\bin\mvn.cmd" (
         set "MAVEN_CMD=%USERPROFILE%\.m2\wrapper\dists\apache-maven-3.10.0\2aaba761688b1a6ea5a46e7e5f4d5406ed7a75ee8da95e5e3079863a23461c9b\bin\mvn.cmd"
     ) else if exist "C:\Users\Ngan Dang Yeu\Downloads\apache-maven-3.10.0-bin\apache-maven-3.10.0\bin\mvn.cmd" (
         set "MAVEN_CMD=C:\Users\Ngan Dang Yeu\Downloads\apache-maven-3.10.0-bin\apache-maven-3.10.0\bin\mvn.cmd"

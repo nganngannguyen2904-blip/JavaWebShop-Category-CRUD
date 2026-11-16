@@ -50,6 +50,11 @@
                                     <li><hr class="dropdown-divider my-1"></li>
                                 </c:if>
                                 <li>
+                                    <a class="dropdown-item" href="${pageContext.request.contextPath}/video">
+                                        <i class="fa fa-video me-2 text-primary"></i>Video của tôi
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item" href="${pageContext.request.contextPath}/home">
                                         <i class="fa fa-home me-2 text-success"></i>Trang Mua Sắm
                                     </a>

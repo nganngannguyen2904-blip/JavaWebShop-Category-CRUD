@@ -54,6 +54,10 @@ public class User implements Serializable {
     @Column(name = "createddate")
     private Date createdDate;
 
+    // Quan hệ 1-N: Một User có nhiều Video
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private java.util.List<Video> videos;
+
     public User() {
         this.status = 1;
         this.roleid = 5;
@@ -151,6 +155,14 @@ public class User implements Serializable {
 
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public java.util.List<Video> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(java.util.List<Video> videos) {
+        this.videos = videos;
     }
 
     @Override

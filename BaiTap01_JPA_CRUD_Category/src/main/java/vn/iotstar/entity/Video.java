@@ -34,6 +34,18 @@ public class Video implements Serializable {
     @Column(name = "Views")
     private int views;
 
+    @Column(name = "VideoUrl", columnDefinition = "nvarchar(255) null")
+    private String videoUrl;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "UploadDate")
+    private java.util.Date uploadDate;
+
+    // Quan hệ Many-to-One với User (Khóa ngoại UserId)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UserId")
+    private User user;
+
     // Quan hệ Many-to-One với Category (Khóa ngoại CategoryId)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CategoryId")
@@ -109,6 +121,30 @@ public class Video implements Serializable {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
+    }
+
+    public java.util.Date getUploadDate() {
+        return uploadDate;
+    }
+
+    public void setUploadDate(java.util.Date uploadDate) {
+        this.uploadDate = uploadDate;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override

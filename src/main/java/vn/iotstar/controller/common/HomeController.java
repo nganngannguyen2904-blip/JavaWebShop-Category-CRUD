@@ -5,10 +5,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import vn.iotstar.model.Category;
 import vn.iotstar.model.Product;
+import vn.iotstar.model.Video;
 import vn.iotstar.service.CategoryService;
 import vn.iotstar.service.ProductService;
+import vn.iotstar.service.VideoService;
 import vn.iotstar.service.impl.CategoryServiceImpl;
 import vn.iotstar.service.impl.ProductServiceImpl;
+import vn.iotstar.service.impl.VideoServiceImpl;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.List;
 /**
  * Controller trang chủ cho người dùng
  * URL: /home
+ * Hiển thị danh mục sản phẩm, sản phẩm nổi bật và 10 Video mới nhất từ CSDL
  */
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/home")
@@ -23,6 +27,7 @@ public class HomeController extends HttpServlet {
 
     private final CategoryService categoryService = new CategoryServiceImpl();
     private final ProductService productService = new ProductServiceImpl();
+    private final VideoService videoService = new VideoServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -34,6 +39,10 @@ public class HomeController extends HttpServlet {
         // 2. Lấy danh sách 8 sản phẩm nổi bật
         List<Product> featuredProducts = productService.findFeatured(8);
         req.setAttribute("featuredProducts", featuredProducts);
+
+        // 3. Lấy 10 Video mới nhất từ database (sắp xếp theo ngày đăng tải giảm dần)
+        List<Video> latestVideos = videoService.getTop10Latest();
+        req.setAttribute("latestVideos", latestVideos);
 
         req.getRequestDispatcher("/views/common/home.jsp").forward(req, resp);
     }
