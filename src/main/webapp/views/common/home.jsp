@@ -481,11 +481,17 @@
                         <!-- Card Body -->
                         <div class="p-3 d-flex flex-column flex-grow-1">
                             <!-- Tiêu đề Video (Bấm được và mở trang chi tiết để phát video theo yêu cầu đề bài) -->
-                            <h6 class="mb-2">
+                            <h6 class="mb-1">
                                 <a href="${pageContext.request.contextPath}/video/detail?id=${v.videoId}" class="home-video-title" title="${v.title}">
                                     ${v.title}
                                 </a>
                             </h6>
+
+                            <c:if test="${v.hasLinkedProduct()}">
+                                <div class="small text-danger fw-semibold text-truncate mb-2" title="${v.productName}">
+                                    <i class="fa fa-tshirt me-1 text-primary"></i>${v.productName}
+                                </div>
+                            </c:if>
 
                             <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-muted" style="font-size: 0.78rem;">
                                 <span><i class="fa fa-eye me-1 text-primary"></i>${v.views} xem</span>

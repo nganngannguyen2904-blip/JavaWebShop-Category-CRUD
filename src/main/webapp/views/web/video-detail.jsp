@@ -137,6 +137,43 @@
 
                     <!-- Tiêu đề & Thông tin Video -->
                     <div class="bg-white p-4 rounded-3 shadow-sm border mb-4">
+                        <!-- Thẻ Sản Phẩm Thời Trang Xuất Hiện Trong Video (Nếu có liên kết) -->
+                        <c:if test="${video.hasLinkedProduct()}">
+                            <div class="card border-primary-subtle bg-light shadow-sm mb-4 rounded-3">
+                                <div class="card-body p-3">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <a href="${pageContext.request.contextPath}/product/detail?id=${video.productId}" target="_blank">
+                                                <img src="${pageContext.request.contextPath}/image?fname=${video.productImage}" 
+                                                     alt="${video.productName}" 
+                                                     class="rounded shadow-sm" 
+                                                     style="width: 70px; height: 70px; object-fit: cover; border: 1px solid #dee2e6;" 
+                                                     onerror="this.src='${pageContext.request.contextPath}/image?fname=default.png';" />
+                                            </a>
+                                            <div>
+                                                <span class="badge bg-primary-subtle text-primary small mb-1">
+                                                    <i class="fa fa-tshirt me-1"></i>Sản phẩm thời trang trong video
+                                                </span>
+                                                <h6 class="fw-bold mb-1">
+                                                    <a href="${pageContext.request.contextPath}/product/detail?id=${video.productId}" class="text-dark text-decoration-none" target="_blank">
+                                                        ${video.productName}
+                                                    </a>
+                                                </h6>
+                                                <div class="text-danger fw-bold fs-6">
+                                                    <fmt:formatNumber value="${video.productPrice}" pattern="#,###" /> ₫
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a href="${pageContext.request.contextPath}/product/detail?id=${video.productId}" class="btn btn-primary btn-sm px-3 fw-bold" target="_blank">
+                                                <i class="fa fa-shopping-bag me-1"></i>Xem Sản Phẩm & Mua
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
+
                         <h3 class="fw-bold text-dark mb-2">${video.title}</h3>
 
                         <div class="d-flex flex-wrap justify-content-between align-items-center text-secondary small pb-3 mb-3 border-bottom">

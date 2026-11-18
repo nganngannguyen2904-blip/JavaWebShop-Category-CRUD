@@ -236,6 +236,27 @@
                             </div>
                         </div>
 
+                        <!-- Sản Phẩm Thời Trang Liên Kết (Tùy chọn) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-secondary">
+                                <i class="fa fa-tags me-1 text-primary"></i>Sản Phẩm Thời Trang Liên Kết Trong Video
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="fa fa-shopping-bag text-primary"></i></span>
+                                <select name="productId" id="productId" class="form-select">
+                                    <option value="">-- Không liên kết sản phẩm (Tùy chọn) --</option>
+                                    <c:forEach items="${productList}" var="p">
+                                        <option value="${p.id}" ${video.productId == p.id ? 'selected' : ''}>
+                                            [#${p.id}] ${p.name} - ${p.formattedPrice}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                            <div class="form-text small text-muted">
+                                Chọn sản phẩm quần áo xuất hiện trong video để người xem có thể nhấn xem chi tiết và mua trực tiếp.
+                            </div>
+                        </div>
+
                         <!-- Trạng thái Active -->
                         <div class="mb-3">
                             <label class="form-label fw-bold small text-secondary">Trạng thái hiển thị</label>
