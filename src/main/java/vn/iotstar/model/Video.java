@@ -19,10 +19,17 @@ public class Video implements Serializable {
     private int active;
     private Timestamp uploadDate;
     private int userId;
+    private Integer productId; // Khóa ngoại liên kết sản phẩm thời trang tương ứng
 
     // Các trường hỗ trợ hiển thị thông tin User đăng tải
     private String userFullName;
     private String userUsername;
+
+    // Các trường hỗ trợ hiển thị thông tin sản phẩm thời trang liên kết
+    private String productName;
+    private java.math.BigDecimal productPrice;
+    private String productImage;
+    private String productCategory;
 
     public Video() {
         this.active = 1;
@@ -41,6 +48,12 @@ public class Video implements Serializable {
         this.active = active;
         this.uploadDate = uploadDate;
         this.userId = userId;
+    }
+
+    public Video(String videoId, String title, String description, String videoUrl, 
+                 String poster, int views, int active, Timestamp uploadDate, int userId, Integer productId) {
+        this(videoId, title, description, videoUrl, poster, views, active, uploadDate, userId);
+        this.productId = productId;
     }
 
     public String getVideoId() {
@@ -129,6 +142,56 @@ public class Video implements Serializable {
 
     public void setUserUsername(String userUsername) {
         this.userUsername = userUsername;
+    }
+
+    public Integer getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Integer productId) {
+        this.productId = productId;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public java.math.BigDecimal getProductPrice() {
+        return productPrice;
+    }
+
+    public void setProductPrice(java.math.BigDecimal productPrice) {
+        this.productPrice = productPrice;
+    }
+
+    public String getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(String productImage) {
+        this.productImage = productImage;
+    }
+
+    public String getProductCategory() {
+        return productCategory;
+    }
+
+    public void setProductCategory(String productCategory) {
+        this.productCategory = productCategory;
+    }
+
+    public String getFormattedProductPrice() {
+        if (productPrice == null) return "0 ₫";
+        java.text.NumberFormat nf = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+        return nf.format(productPrice) + " ₫";
+    }
+
+    public boolean hasLinkedProduct() {
+        return productId != null && productId > 0 && productName != null && !productName.trim().isEmpty();
     }
 
     @Override

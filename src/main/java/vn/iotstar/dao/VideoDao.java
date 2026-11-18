@@ -29,4 +29,8 @@ public interface VideoDao {
     int countAll();
 
     void increaseViews(String videoId);
+
+    List<Video> searchAndFilter(int userId, boolean isAdmin, String keyword, String sort, Integer productId, int page, int pageSize);
+
+    int countSearchAndFilter(int userId, boolean isAdmin, String keyword, Integer productId);
 }

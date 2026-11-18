@@ -38,6 +38,7 @@ import vn.iotstar.util.Constant;
 public class VideoCrudController extends HttpServlet {
 
     private final VideoService videoService = new VideoServiceImpl();
+    private final vn.iotstar.service.ProductService productService = new vn.iotstar.service.impl.ProductServiceImpl();
 
     // Các định dạng file cho phép theo chuẩn HTML5
     private static final List<String> ALLOWED_VIDEO_EXTS = Arrays.asList(".mp4", ".webm", ".ogg", ".mov");
@@ -56,6 +57,7 @@ public class VideoCrudController extends HttpServlet {
         String path = req.getServletPath();
 
         if ("/video/add".equals(path)) {
+            req.setAttribute("productList", productService.findAll());
             req.getRequestDispatcher("/views/web/video-add.jsp").forward(req, resp);
         } else if ("/video/edit".equals(path)) {
             handleGetEdit(req, resp, currentUser);
@@ -93,9 +95,20 @@ public class VideoCrudController extends HttpServlet {
             throws ServletException, IOException {
         String title = req.getParameter("title");
         String description = req.getParameter("description");
+        String productIdStr = req.getParameter("productId");
+        Integer productId = null;
+        if (productIdStr != null && !productIdStr.trim().isEmpty()) {
+            try {
+                productId = Integer.parseInt(productIdStr.trim());
+                if (productId <= 0) productId = null;
+            } catch (NumberFormatException ignored) {
+            }
+        }
 
         req.setAttribute("oldTitle", title);
         req.setAttribute("oldDescription", description);
+        req.setAttribute("oldProductId", productId);
+        req.setAttribute("productList", productService.findAll());
 
         // 1. Kiểm tra tiêu đề bắt buộc
         if (title == null || title.trim().isEmpty()) {
@@ -189,6 +202,7 @@ public class VideoCrudController extends HttpServlet {
         newVideo.setActive(1);
         newVideo.setUploadDate(new Timestamp(System.currentTimeMillis()));
         newVideo.setUserId(currentUser.getId());
+        newVideo.setProductId(productId);
 
         videoService.insert(newVideo);
 
@@ -217,6 +231,7 @@ public class VideoCrudController extends HttpServlet {
         }
 
         req.setAttribute("video", video);
+        req.setAttribute("productList", productService.findAll());
         req.getRequestDispatcher("/views/web/video-edit.jsp").forward(req, resp);
     }
 
@@ -226,6 +241,16 @@ public class VideoCrudController extends HttpServlet {
         String title = req.getParameter("title");
         String description = req.getParameter("description");
         String activeStr = req.getParameter("active");
+        String productIdStr = req.getParameter("productId");
+        Integer productId = null;
+        if (productIdStr != null && !productIdStr.trim().isEmpty()) {
+            try {
+                productId = Integer.parseInt(productIdStr.trim());
+                if (productId <= 0) productId = null;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        req.setAttribute("productList", productService.findAll());
 
         if (videoId == null || videoId.trim().isEmpty()) {
             resp.sendRedirect(req.getContextPath() + "/video");
@@ -254,6 +279,7 @@ public class VideoCrudController extends HttpServlet {
         existingVideo.setTitle(title.trim());
         existingVideo.setDescription(description != null ? description.trim() : "");
         existingVideo.setActive("1".equals(activeStr) ? 1 : 0);
+        existingVideo.setProductId(productId);
 
         // 1. Kiểm tra nếu có upload ảnh poster mới thay thế
         Part posterPart = null;

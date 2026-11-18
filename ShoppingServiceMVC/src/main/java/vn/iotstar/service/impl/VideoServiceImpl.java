@@ -113,4 +113,16 @@ public class VideoServiceImpl implements VideoService {
         if (videoId == null || videoId.trim().isEmpty()) return;
         videoDao.increaseViews(videoId.trim());
     }
+
+    @Override
+    public List<Video> searchAndFilter(int userId, boolean isAdmin, String keyword, String sort, Integer productId, int page, int pageSize) {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 6;
+        return videoDao.searchAndFilter(userId, isAdmin, keyword, sort, productId, page, pageSize);
+    }
+
+    @Override
+    public int countSearchAndFilter(int userId, boolean isAdmin, String keyword, Integer productId) {
+        return videoDao.countSearchAndFilter(userId, isAdmin, keyword, productId);
+    }
 }
