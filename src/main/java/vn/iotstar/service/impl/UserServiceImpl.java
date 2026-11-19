@@ -241,4 +241,41 @@ public class UserServiceImpl implements UserService {
         userDao.clearResetToken(user.getId());
         return true;
     }
+
+    @Override
+    public boolean updateProfile(int userId, String fullname, String phone) {
+        if (userId <= 0 || fullname == null || fullname.trim().isEmpty()) {
+            return false;
+        }
+        userDao.updateProfile(userId, fullname.trim(), phone != null ? phone.trim() : "");
+        return true;
+    }
+
+    @Override
+    public boolean updateEmail(int userId, String newEmail) {
+        if (userId <= 0 || newEmail == null || newEmail.trim().isEmpty()) {
+            return false;
+        }
+        userDao.updateEmail(userId, newEmail.trim().toLowerCase());
+        return true;
+    }
+
+    @Override
+    public boolean updateAvatar(int userId, String avatarUrl) {
+        if (userId <= 0 || avatarUrl == null || avatarUrl.trim().isEmpty()) {
+            return false;
+        }
+        userDao.updateAvatar(userId, avatarUrl.trim());
+        return true;
+    }
+
+    @Override
+    public boolean checkExistEmailExceptUser(String email, int userId) {
+        return userDao.checkExistEmailExceptUser(email, userId);
+    }
+
+    @Override
+    public boolean checkExistPhoneExceptUser(String phone, int userId) {
+        return userDao.checkExistPhoneExceptUser(phone, userId);
+    }
 }

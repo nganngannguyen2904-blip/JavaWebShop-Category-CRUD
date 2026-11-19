@@ -55,6 +55,7 @@ public class Constant {
         public static final String HOME = "/views/common/home.jsp";
         public static final String ADMIN_HOME = "/views/admin/home.jsp";
         public static final String ACCESS_DENIED = "/views/common/access-denied.jsp";
+        public static final String PROFILE = "/views/web/profile.jsp";
 
         // Category views
         public static final String CATEGORY_LIST = "/views/admin/category/list-category.jsp";

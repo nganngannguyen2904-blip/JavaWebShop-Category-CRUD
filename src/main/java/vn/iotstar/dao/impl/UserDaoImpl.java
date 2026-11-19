@@ -212,6 +212,80 @@ public class UserDaoImpl extends DBConnection implements UserDao {
     }
 
     @Override
+    public void updateProfile(int userId, String fullname, String phone) {
+        String sql = "UPDATE [User] SET fullname = ?, phone = ? WHERE id = ?";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, fullname);
+            ps.setString(2, phone);
+            ps.setInt(3, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateEmail(int userId, String newEmail) {
+        String sql = "UPDATE [User] SET email = ? WHERE id = ?";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newEmail);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateAvatar(int userId, String avatarUrl) {
+        String sql = "UPDATE [User] SET avatar = ? WHERE id = ?";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, avatarUrl);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean checkExistEmailExceptUser(String email, int userId) {
+        if (email == null || email.trim().isEmpty()) return false;
+        String sql = "SELECT 1 FROM [User] WHERE LOWER(email) = LOWER(?) AND id <> ?";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email.trim());
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkExistPhoneExceptUser(String phone, int userId) {
+        if (phone == null || phone.trim().isEmpty()) return false;
+        String sql = "SELECT 1 FROM [User] WHERE phone = ? AND id <> ?";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, phone.trim());
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
     public void updatePassword(int userId, String newHashedPassword) {
         String sql = "UPDATE [User] SET password = ? WHERE id = ?";
         try (Connection conn = super.getConnection();

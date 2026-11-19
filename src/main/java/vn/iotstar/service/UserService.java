@@ -85,4 +85,29 @@ public interface UserService {
      * Cập nhật mật khẩu mới theo email (sau khi xác thực OTP thành công)
      */
     boolean changePassword(String email, String newPassword);
+
+    /**
+     * Cập nhật thông tin Họ tên và Số điện thoại cho Profile
+     */
+    boolean updateProfile(int userId, String fullname, String phone);
+
+    /**
+     * Cập nhật Email sau khi xác thực OTP thành công
+     */
+    boolean updateEmail(int userId, String newEmail);
+
+    /**
+     * Cập nhật URL ảnh đại diện (Cloudinary hoặc local)
+     */
+    boolean updateAvatar(int userId, String avatarUrl);
+
+    /**
+     * Kiểm tra email đã được người khác sử dụng chưa (loại trừ userId hiện tại)
+     */
+    boolean checkExistEmailExceptUser(String email, int userId);
+
+    /**
+     * Kiểm tra số điện thoại đã được người khác sử dụng chưa (loại trừ userId hiện tại)
+     */
+    boolean checkExistPhoneExceptUser(String phone, int userId);
 }

@@ -56,6 +56,31 @@ public interface UserDao {
     void update(User user);
 
     /**
+     * Cập nhật thông tin Họ tên và Số điện thoại cho Profile
+     */
+    void updateProfile(int userId, String fullname, String phone);
+
+    /**
+     * Cập nhật Email sau khi xác thực OTP thành công
+     */
+    void updateEmail(int userId, String newEmail);
+
+    /**
+     * Cập nhật URL ảnh đại diện (Cloudinary hoặc local)
+     */
+    void updateAvatar(int userId, String avatarUrl);
+
+    /**
+     * Kiểm tra email đã được người khác sử dụng chưa (loại trừ userId hiện tại)
+     */
+    boolean checkExistEmailExceptUser(String email, int userId);
+
+    /**
+     * Kiểm tra số điện thoại đã được người khác sử dụng chưa (loại trừ userId hiện tại)
+     */
+    boolean checkExistPhoneExceptUser(String phone, int userId);
+
+    /**
      * Cập nhật mật khẩu mới (đã hash bằng BCrypt)
      */
     void updatePassword(int userId, String newHashedPassword);

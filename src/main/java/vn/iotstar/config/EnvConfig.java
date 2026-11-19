@@ -77,7 +77,8 @@ public class EnvConfig {
         }
 
         // 3. Fallback lấy thêm từ System Properties & System Environment
-        String[] knownKeys = {"MAIL_HOST", "MAIL_PORT", "MAIL_USERNAME", "MAIL_APP_PASSWORD", "MAIL_FROM"};
+        String[] knownKeys = {"MAIL_HOST", "MAIL_PORT", "MAIL_USERNAME", "MAIL_APP_PASSWORD", "MAIL_FROM",
+                              "CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET", "CLOUDINARY_UPLOAD_PRESET"};
         for (String k : knownKeys) {
             if (!ENV_CACHE.containsKey(k)) {
                 String val = System.getProperty(k);
@@ -253,11 +254,29 @@ public class EnvConfig {
     }
 
     public static String getSafeConfigSummary() {
-        return String.format("MailConfig[Host=%s, Port=%d, SenderUsername=%s, From=%s, AppPassword=%s]",
+        return String.format("MailConfig[Host=%s, Port=%d, SenderUsername=%s, From=%s, AppPassword=%s] | Cloudinary[CloudName=%s, ApiKey=%s]",
                 getMailHost(),
                 getMailPort(),
                 getMailUsername() != null ? getMailUsername() : "CHƯA CÓ",
                 getMailFrom() != null ? getMailFrom() : "CHƯA CÓ",
-                getMailAppPassword() != null ? "****** (Đã nạp " + getMailAppPassword().length() + " ký tự)" : "CHƯA CÓ");
+                getMailAppPassword() != null ? "****** (Đã nạp " + getMailAppPassword().length() + " ký tự)" : "CHƯA CÓ",
+                getCloudinaryCloudName(),
+                getCloudinaryApiKey() != null ? "******" : "CHƯA CÓ");
+    }
+
+    public static String getCloudinaryCloudName() {
+        return get("CLOUDINARY_CLOUD_NAME", "shopping-service-fashion");
+    }
+
+    public static String getCloudinaryApiKey() {
+        return get("CLOUDINARY_API_KEY", "176849265147852");
+    }
+
+    public static String getCloudinaryApiSecret() {
+        return get("CLOUDINARY_API_SECRET", "abcdef1234567890abcdef12345");
+    }
+
+    public static String getCloudinaryUploadPreset() {
+        return get("CLOUDINARY_UPLOAD_PRESET", "fashion_store");
     }
 }
