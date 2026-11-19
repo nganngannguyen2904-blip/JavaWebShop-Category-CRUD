@@ -89,61 +89,8 @@
 </head>
 <body>
 
-<!-- Admin Header Bar -->
-<header class="admin-topbar d-flex justify-content-between align-items-center shadow-sm">
-    <div class="d-flex align-items-center">
-        <h4 class="mb-0 fw-bold"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</h4>
-        <span class="ms-3 badge bg-light text-primary">Shopping Service MVC</span>
-    </div>
-    <div class="d-flex align-items-center">
-        <span class="me-3">
-            <i class="fa fa-user-circle me-1"></i>
-            Xin chào, <strong>${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}</strong>
-        </span>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-sm btn-danger px-3">
-            <i class="fa fa-sign-out-alt me-1"></i>Đăng xuất
-        </a>
-    </div>
-</header>
-
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Menu -->
-        <aside class="col-md-3 col-lg-2 sidebar">
-            <div class="user-panel">
-                <img src="https://ui-avatars.com/api/?name=${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}&background=0088cc&color=fff&size=128" alt="User Image">
-                <div class="mt-2 text-white fw-bold">${sessionScope.account != null ? sessionScope.account.fullName : 'Nguyễn Hữu Trung'}</div>
-                <div class="small text-success"><i class="fa fa-circle text-success me-1" style="font-size: 10px;"></i>Bạn là Admin</div>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/home">
-                        <i class="fa fa-gauge"></i> <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="${pageContext.request.contextPath}/admin/category/list" class="bg-primary text-white">
-                        <i class="fa fa-folder-open"></i> <span>Quản lý Danh mục</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/home" target="_blank">
-                        <i class="fa fa-desktop"></i> <span>Xem Trang Bán Hàng</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/logout">
-                        <i class="fa fa-power-off text-danger"></i> <span>Đăng xuất</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <!-- Main Content Area (Theo Slide 31-32 & 36 - File 1) -->
-        <main class="col-md-9 col-lg-10 content-wrapper">
-            
-            <div class="mb-4">
+<div>
+    <div class="mb-4">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="${pageContext.request.contextPath}/admin/home">Dashboard</a></li>
@@ -169,7 +116,7 @@
                         
                         <!-- Form Edit Danh Mục (Theo Slide 31 - File 1) -->
                         <c:url value="/admin/category/edit" var="editUrl"></c:url>
-                        <form role="form" action="${editUrl}" method="post" enctype="multipart/form-data">
+                        <form role="form" id="categoryEditForm" action="${editUrl}" method="post" enctype="multipart/form-data" novalidate>
                             
                             <!-- Hidden input category id -->
                             <input type="hidden" name="id" value="${category.id}" />
@@ -178,10 +125,16 @@
                             <div class="mb-4">
                                 <label class="form-label fw-bold text-dark">Tên danh mục <span class="text-danger">*</span></label>
                                 <input type="text" 
-                                       class="form-control form-control-lg" 
+                                       class="form-control form-control-lg ${not empty errors.catename ? 'is-invalid' : ''}" 
                                        value="${category.name}" 
                                        name="catename" 
-                                       required />
+                                       id="editCatenameInput"
+                                       required 
+                                       minlength="2"
+                                       maxlength="100" />
+                                <div class="invalid-feedback" id="editCatenameError">
+                                    ${not empty errors.catename ? errors.catename : 'Tên danh mục bắt buộc nhập (từ 2 đến 100 ký tự)!'}
+                                </div>
                             </div>
 
                             <!-- Ảnh đại diện hiện tại & Upload ảnh mới -->
@@ -200,10 +153,13 @@
 
                                 <label class="form-label fw-bold text-dark mt-2">Chọn ảnh mới thay thế (nếu muốn)</label>
                                 <input type="file" 
-                                       class="form-control" 
+                                       class="form-control ${not empty errors.icon ? 'is-invalid' : ''}" 
                                        name="icon" 
                                        id="editIconInput"
-                                       accept="image/*" />
+                                       accept="image/png, image/jpeg, image/jpg, image/webp" />
+                                <div class="invalid-feedback" id="editIconError">
+                                    ${not empty errors.icon ? errors.icon : 'Hình ảnh không hợp lệ (PNG, JPG, WEBP tối đa 5MB)!'}
+                                </div>
                                 <div class="form-text text-muted">Nếu không chọn tệp mới, ảnh đại diện cũ sẽ được giữ nguyên.</div>
                             </div>
 
@@ -238,12 +194,42 @@
                     </div>
                 </div>
             </div>
-
-        </main>
-    </div>
 </div>
 
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Client-side Validation cho Form Sửa Danh Mục
+    document.getElementById('categoryEditForm').addEventListener('submit', function (e) {
+        let valid = true;
+        const nameInput = document.getElementById('editCatenameInput');
+        const iconInput = document.getElementById('editIconInput');
+
+        if (!nameInput.value || nameInput.value.trim().length < 2) {
+            nameInput.classList.add('is-invalid');
+            valid = false;
+        } else {
+            nameInput.classList.remove('is-invalid');
+            nameInput.classList.add('is-valid');
+        }
+
+        if (iconInput.files && iconInput.files[0]) {
+            const file = iconInput.files[0];
+            const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+            if (!validTypes.includes(file.type)) {
+                iconInput.classList.add('is-invalid');
+                valid = false;
+            } else if (file.size > 5 * 1024 * 1024) {
+                alert('Dung lượng tệp ảnh không được vượt quá 5MB!');
+                iconInput.classList.add('is-invalid');
+                valid = false;
+            } else {
+                iconInput.classList.remove('is-invalid');
+            }
+        }
+
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+</script>
 </body>
 </html>

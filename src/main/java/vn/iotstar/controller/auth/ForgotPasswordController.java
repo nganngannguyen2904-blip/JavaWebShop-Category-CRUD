@@ -25,6 +25,9 @@ public class ForgotPasswordController extends HttpServlet {
     private final UserService userService = new UserServiceImpl();
     private final EmailService emailService = EmailService.getInstance();
 
+    private static final java.util.regex.Pattern EMAIL_PATTERN = 
+            java.util.regex.Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$");
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -38,9 +41,19 @@ public class ForgotPasswordController extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
 
         String email = req.getParameter("email");
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+
         if (email == null || email.trim().isEmpty()) {
-            req.setAttribute("alert", "Vui lòng nhập địa chỉ email tài khoản của bạn!");
+            errors.put("email", "Vui lòng nhập địa chỉ email tài khoản của bạn!");
+        } else if (!EMAIL_PATTERN.matcher(email.trim()).matches()) {
+            errors.put("email", "Địa chỉ email không đúng định dạng (Ví dụ: user@gmail.com)!");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("alert", errors.get("email"));
             req.setAttribute("alertType", "danger");
+            req.setAttribute("oldEmail", email != null ? email.trim() : "");
             req.getRequestDispatcher(Constant.Path.FORGOT_PASSWORD).forward(req, resp);
             return;
         }

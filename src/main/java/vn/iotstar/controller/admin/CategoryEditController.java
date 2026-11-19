@@ -80,25 +80,65 @@ public class CategoryEditController extends HttpServlet {
 
         String idStr = req.getParameter("id");
         String catename = req.getParameter("catename");
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
 
-        if (idStr == null || idStr.trim().isEmpty() || catename == null || catename.trim().isEmpty()) {
-            req.setAttribute("alert", "Vui lòng nhập đầy đủ thông tin danh mục!");
-            req.setAttribute("alertType", "danger");
-            if (idStr != null) {
-                Category c = cateService.get(Integer.parseInt(idStr));
-                req.setAttribute("category", c);
+        if (idStr == null || idStr.trim().isEmpty()) {
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+            return;
+        }
+
+        int cateid = 0;
+        try {
+            cateid = Integer.parseInt(idStr.trim());
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+            return;
+        }
+
+        Category cateOld = cateService.get(cateid);
+        if (cateOld == null) {
+            resp.sendRedirect(req.getContextPath() + "/admin/category/list");
+            return;
+        }
+
+        // Validation Server-side cho Edit Danh Mục
+        if (catename == null || catename.trim().isEmpty()) {
+            errors.put("catename", "Tên danh mục không được để trống!");
+        } else if (catename.trim().length() < 2 || catename.trim().length() > 100) {
+            errors.put("catename", "Tên danh mục phải có độ dài từ 2 đến 100 ký tự!");
+        } else if (cateService.checkExistNameExcept(catename.trim(), cateid)) {
+            errors.put("catename", "Tên danh mục '" + catename.trim() + "' đã được sử dụng bởi danh mục khác!");
+        }
+
+        Part part = null;
+        try {
+            part = req.getPart("icon");
+            if (part != null && part.getSize() > 0) {
+                String submittedFileName = Paths.get(part.getSubmittedFileName()).getFileName().toString().toLowerCase();
+                if (!submittedFileName.endsWith(".png") && !submittedFileName.endsWith(".jpg") 
+                        && !submittedFileName.endsWith(".jpeg") && !submittedFileName.endsWith(".webp")) {
+                    errors.put("icon", "Chỉ chấp nhận tệp tin hình ảnh định dạng PNG, JPG, JPEG hoặc WEBP!");
+                } else if (part.getSize() > 5 * 1024 * 1024) {
+                    errors.put("icon", "Dung lượng hình ảnh không được vượt quá 5MB!");
+                }
             }
+        } catch (Exception e) {
+            errors.put("icon", "Lỗi đọc tệp tin tải lên: " + e.getMessage());
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("alert", errors.containsKey("catename") ? errors.get("catename") : errors.get("icon"));
+            req.setAttribute("alertType", "danger");
+            cateOld.setName(catename != null ? catename.trim() : "");
+            req.setAttribute("category", cateOld);
             req.getRequestDispatcher(Constant.Path.CATEGORY_EDIT).forward(req, resp);
             return;
         }
 
-        int cateid = Integer.parseInt(idStr);
         Category category = new Category();
         category.setId(cateid);
         category.setName(catename.trim());
-
-        // Lấy thông tin hiện tại để giữ hình cũ nếu không upload hình mới
-        Category cateOld = cateService.get(cateid);
         String fileOld = (cateOld != null && cateOld.getIcon() != null) ? cateOld.getIcon() : "default.png";
 
         String uploadPath = Constant.UPLOAD_DIR + File.separator + "category";
@@ -108,7 +148,9 @@ public class CategoryEditController extends HttpServlet {
         }
 
         try {
-            Part part = req.getPart("icon");
+            if (part == null) {
+                part = req.getPart("icon");
+            }
             if (part != null && part.getSize() > 0) {
                 String submittedFileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                 int index = submittedFileName.lastIndexOf(".");

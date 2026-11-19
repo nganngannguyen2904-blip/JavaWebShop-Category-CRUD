@@ -68,23 +68,23 @@ public class RegisterController extends HttpServlet {
 
         // 1. Kiểm tra không được để trống các trường bắt buộc
         if (fullname == null || fullname.trim().isEmpty()) {
-            sendError(req, resp, "Vui lòng nhập họ và tên của bạn!");
+            sendError(req, resp, "fullname", "Vui lòng nhập họ và tên của bạn!");
             return;
         }
         if (email == null || email.trim().isEmpty()) {
-            sendError(req, resp, "Vui lòng nhập địa chỉ email!");
+            sendError(req, resp, "email", "Vui lòng nhập địa chỉ email!");
             return;
         }
         if (username == null || username.trim().isEmpty()) {
-            sendError(req, resp, "Vui lòng nhập tên đăng nhập!");
+            sendError(req, resp, "username", "Vui lòng nhập tên đăng nhập!");
             return;
         }
         if (password == null || password.isEmpty()) {
-            sendError(req, resp, "Vui lòng nhập mật khẩu!");
+            sendError(req, resp, "password", "Vui lòng nhập mật khẩu!");
             return;
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
-            sendError(req, resp, "Vui lòng xác nhận lại mật khẩu!");
+            sendError(req, resp, "confirmpassword", "Vui lòng xác nhận lại mật khẩu!");
             return;
         }
 
@@ -95,49 +95,49 @@ public class RegisterController extends HttpServlet {
 
         // 2. Kiểm tra định dạng Email hợp lệ
         if (!EMAIL_PATTERN.matcher(cleanEmail).matches()) {
-            sendError(req, resp, "Địa chỉ email không đúng định dạng (Ví dụ: user@gmail.com)!");
+            sendError(req, resp, "email", "Địa chỉ email không đúng định dạng (Ví dụ: user@gmail.com)!");
             return;
         }
 
         // 3. Kiểm tra định dạng Số điện thoại (nếu có nhập)
         if (!cleanPhone.isEmpty() && !PHONE_PATTERN.matcher(cleanPhone).matches()) {
-            sendError(req, resp, "Số điện thoại không hợp lệ (Phải là 10 chữ số đầu 03, 05, 07, 08, 09)!");
+            sendError(req, resp, "phone", "Số điện thoại không hợp lệ (Phải là 10 chữ số đầu 03, 05, 07, 08, 09)!");
             return;
         }
 
         // 4. Kiểm tra định dạng Username
         if (!USERNAME_PATTERN.matcher(cleanUsername).matches()) {
-            sendError(req, resp, "Tên đăng nhập từ 3 đến 30 ký tự, chỉ gồm chữ cái, số và dấu gạch dưới (_), không chứa dấu cách hay ký tự đặc biệt!");
+            sendError(req, resp, "username", "Tên đăng nhập từ 3 đến 30 ký tự, chỉ gồm chữ cái, số và dấu gạch dưới (_), không chứa dấu cách hay ký tự đặc biệt!");
             return;
         }
 
         // 5. Kiểm tra chính sách mật khẩu (Tối thiểu 6 ký tự)
         if (password.length() < 6) {
-            sendError(req, resp, "Mật khẩu bảo mật phải có độ dài tối thiểu từ 6 ký tự trở lên!");
+            sendError(req, resp, "password", "Mật khẩu bảo mật phải có độ dài tối thiểu từ 6 ký tự trở lên!");
             return;
         }
 
         // 6. Kiểm tra mật khẩu xác nhận phải trùng khớp
         if (!password.equals(confirmPassword)) {
-            sendError(req, resp, "Mật khẩu xác nhận không trùng khớp với mật khẩu đã nhập!");
+            sendError(req, resp, "confirmpassword", "Mật khẩu xác nhận không trùng khớp với mật khẩu đã nhập!");
             return;
         }
 
         // 7. Kiểm tra trùng lặp Email trong cơ sở dữ liệu
         if (userService.checkExistEmail(cleanEmail)) {
-            sendError(req, resp, "Địa chỉ email '" + cleanEmail + "' đã được sử dụng bởi tài khoản khác!");
+            sendError(req, resp, "email", "Địa chỉ email '" + cleanEmail + "' đã được sử dụng bởi tài khoản khác!");
             return;
         }
 
         // 8. Kiểm tra trùng lặp Tên đăng nhập trong cơ sở dữ liệu
         if (userService.checkExistUsername(cleanUsername)) {
-            sendError(req, resp, "Tên đăng nhập '" + cleanUsername + "' đã tồn tại! Vui lòng chọn tên đăng nhập khác.");
+            sendError(req, resp, "username", "Tên đăng nhập '" + cleanUsername + "' đã tồn tại! Vui lòng chọn tên đăng nhập khác.");
             return;
         }
 
         // 9. Kiểm tra trùng lặp Số điện thoại (nếu có)
         if (!cleanPhone.isEmpty() && userService.checkExistPhone(cleanPhone)) {
-            sendError(req, resp, "Số điện thoại '" + cleanPhone + "' đã được đăng ký!");
+            sendError(req, resp, "phone", "Số điện thoại '" + cleanPhone + "' đã được đăng ký!");
             return;
         }
 
@@ -178,12 +178,22 @@ public class RegisterController extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendError(req, resp, "Không thể gửi email OTP: " + e.getMessage() + ". Vui lòng kiểm tra lại cấu hình email!");
+            sendError(req, resp, "email", "Không thể gửi email OTP: " + e.getMessage() + ". Vui lòng kiểm tra lại cấu hình email!");
         }
     }
 
     private void sendError(HttpServletRequest req, HttpServletResponse resp, String message)
             throws ServletException, IOException {
+        sendError(req, resp, null, message);
+    }
+
+    private void sendError(HttpServletRequest req, HttpServletResponse resp, String field, String message)
+            throws ServletException, IOException {
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+        if (field != null && !field.isEmpty()) {
+            errors.put(field, message);
+        }
+        req.setAttribute("errors", errors);
         req.setAttribute("alert", message);
         req.setAttribute("alertType", "danger");
         req.getRequestDispatcher(Constant.Path.REGISTER).forward(req, resp);

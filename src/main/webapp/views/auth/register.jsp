@@ -121,14 +121,16 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa fa-id-card"></i></span>
                 <input type="text" 
-                       class="form-control form-control-custom" 
+                       class="form-control form-control-custom ${not empty errors.fullname ? 'is-invalid' : ''}" 
                        id="fullname" 
                        name="fullname" 
                        value="<c:out value='${oldFullname}'/>" 
                        placeholder="Ví dụ: Nguyễn Văn An" 
                        required>
             </div>
-            <div class="text-danger small d-none mt-1" id="fullnameError">Vui lòng nhập họ và tên!</div>
+            <div class="text-danger small ${not empty errors.fullname ? 'd-block' : 'd-none'} mt-1" id="fullnameError">
+                ${not empty errors.fullname ? errors.fullname : 'Vui lòng nhập họ và tên!'}
+            </div>
         </div>
 
         <div class="row">
@@ -138,14 +140,16 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa fa-envelope"></i></span>
                     <input type="email" 
-                           class="form-control form-control-custom" 
+                           class="form-control form-control-custom ${not empty errors.email ? 'is-invalid' : ''}" 
                            id="email" 
                            name="email" 
                            value="<c:out value='${oldEmail}'/>" 
                            placeholder="user@example.com" 
                            required>
                 </div>
-                <div class="text-danger small d-none mt-1" id="emailError">Email không đúng định dạng!</div>
+                <div class="text-danger small ${not empty errors.email ? 'd-block' : 'd-none'} mt-1" id="emailError">
+                    ${not empty errors.email ? errors.email : 'Email không đúng định dạng!'}
+                </div>
             </div>
 
             <!-- Số điện thoại -->
@@ -154,13 +158,15 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa fa-phone"></i></span>
                     <input type="tel" 
-                           class="form-control form-control-custom" 
+                           class="form-control form-control-custom ${not empty errors.phone ? 'is-invalid' : ''}" 
                            id="phone" 
                            name="phone" 
                            value="<c:out value='${oldPhone}'/>" 
                            placeholder="0901234567">
                 </div>
-                <div class="text-danger small d-none mt-1" id="phoneError">Số điện thoại phải có 10 chữ số (đầu 03, 05, 07, 08, 09)!</div>
+                <div class="text-danger small ${not empty errors.phone ? 'd-block' : 'd-none'} mt-1" id="phoneError">
+                    ${not empty errors.phone ? errors.phone : 'Số điện thoại phải có 10 chữ số (đầu 03, 05, 07, 08, 09)!'}
+                </div>
             </div>
         </div>
 
@@ -170,14 +176,16 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa fa-user"></i></span>
                 <input type="text" 
-                       class="form-control form-control-custom" 
+                       class="form-control form-control-custom ${not empty errors.username ? 'is-invalid' : ''}" 
                        id="username" 
                        name="username" 
                        value="<c:out value='${oldUsername}'/>" 
                        placeholder="Từ 3-30 ký tự, không dấu cách" 
                        required>
             </div>
-            <div class="text-danger small d-none mt-1" id="usernameError">Tên đăng nhập từ 3 đến 30 ký tự (chữ, số và _)!</div>
+            <div class="text-danger small ${not empty errors.username ? 'd-block' : 'd-none'} mt-1" id="usernameError">
+                ${not empty errors.username ? errors.username : 'Tên đăng nhập từ 3 đến 30 ký tự (chữ, số và _)!'}
+            </div>
         </div>
 
         <div class="row">
@@ -187,7 +195,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa fa-lock"></i></span>
                     <input type="password" 
-                           class="form-control form-control-custom" 
+                           class="form-control form-control-custom ${not empty errors.password ? 'is-invalid' : ''}" 
                            id="password" 
                            name="password" 
                            placeholder="Tối thiểu 6 ký tự" 
@@ -196,7 +204,9 @@
                         <i class="fa fa-eye" id="eye1"></i>
                     </button>
                 </div>
-                <div class="text-danger small d-none mt-1" id="passwordError">Mật khẩu phải từ 6 ký tự trở lên!</div>
+                <div class="text-danger small ${not empty errors.password ? 'd-block' : 'd-none'} mt-1" id="passwordError">
+                    ${not empty errors.password ? errors.password : 'Mật khẩu phải từ 6 ký tự trở lên!'}
+                </div>
             </div>
 
             <!-- Xác nhận mật khẩu -->
@@ -205,7 +215,7 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa fa-check-double"></i></span>
                     <input type="password" 
-                           class="form-control form-control-custom" 
+                           class="form-control form-control-custom ${not empty errors.confirmpassword ? 'is-invalid' : ''}" 
                            id="confirmpassword" 
                            name="confirmpassword" 
                            placeholder="Nhập lại mật khẩu" 
@@ -214,7 +224,9 @@
                         <i class="fa fa-eye" id="eye2"></i>
                     </button>
                 </div>
-                <div class="text-danger small d-none mt-1" id="confirmError">Mật khẩu xác nhận không khớp!</div>
+                <div class="text-danger small ${not empty errors.confirmpassword ? 'd-block' : 'd-none'} mt-1" id="confirmError">
+                    ${not empty errors.confirmpassword ? errors.confirmpassword : 'Mật khẩu xác nhận không khớp!'}
+                </div>
             </div>
         </div>
 

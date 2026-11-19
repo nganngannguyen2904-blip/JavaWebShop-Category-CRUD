@@ -63,11 +63,39 @@ public class CategoryAddController extends HttpServlet {
         }
 
         String catename = req.getParameter("catename");
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
 
-        // Validate
+        // Validation Server-side cho Insert Danh Mục
         if (catename == null || catename.trim().isEmpty()) {
-            req.setAttribute("alert", "Tên danh mục không được để trống!");
+            errors.put("catename", "Tên danh mục không được để trống!");
+        } else if (catename.trim().length() < 2 || catename.trim().length() > 100) {
+            errors.put("catename", "Tên danh mục phải có độ dài từ 2 đến 100 ký tự!");
+        } else if (cateService.checkExistName(catename.trim())) {
+            errors.put("catename", "Tên danh mục '" + catename.trim() + "' đã tồn tại! Vui lòng đặt tên khác.");
+        }
+
+        // Kiểm tra tệp tin ảnh upload (nếu có chọn)
+        Part part = null;
+        try {
+            part = req.getPart("icon");
+            if (part != null && part.getSize() > 0) {
+                String submittedFileName = Paths.get(part.getSubmittedFileName()).getFileName().toString().toLowerCase();
+                if (!submittedFileName.endsWith(".png") && !submittedFileName.endsWith(".jpg") 
+                        && !submittedFileName.endsWith(".jpeg") && !submittedFileName.endsWith(".webp")) {
+                    errors.put("icon", "Chỉ chấp nhận tệp tin hình ảnh định dạng PNG, JPG, JPEG hoặc WEBP!");
+                } else if (part.getSize() > 5 * 1024 * 1024) {
+                    errors.put("icon", "Dung lượng hình ảnh không được vượt quá 5MB!");
+                }
+            }
+        } catch (Exception e) {
+            errors.put("icon", "Lỗi đọc tệp tin tải lên: " + e.getMessage());
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("alert", errors.containsKey("catename") ? errors.get("catename") : errors.get("icon"));
             req.setAttribute("alertType", "danger");
+            req.setAttribute("oldCatename", catename != null ? catename.trim() : "");
             req.getRequestDispatcher(Constant.Path.CATEGORY_ADD).forward(req, resp);
             return;
         }
@@ -84,7 +112,9 @@ public class CategoryAddController extends HttpServlet {
 
         String fname = "default.png";
         try {
-            Part part = req.getPart("icon");
+            if (part == null) {
+                part = req.getPart("icon");
+            }
             if (part != null && part.getSize() > 0) {
                 String submittedFileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                 int index = submittedFileName.lastIndexOf(".");

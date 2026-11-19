@@ -111,79 +111,9 @@
 </head>
 <body>
 
-<!-- Admin Header Bar (Theo giao diện mẫu Slide 34) -->
-<header class="admin-topbar d-flex justify-content-between align-items-center shadow-sm">
-    <div class="d-flex align-items-center">
-        <h4 class="mb-0 fw-bold"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</h4>
-        <span class="ms-3 badge bg-light text-primary">Shopping Service MVC</span>
-    </div>
-    <div class="d-flex align-items-center">
-        <span class="me-3">
-            <i class="fa fa-user-circle me-1"></i>
-            Xin chào, <strong>${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}</strong>
-        </span>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-sm btn-danger px-3">
-            <i class="fa fa-sign-out-alt me-1"></i>Đăng xuất
-        </a>
-    </div>
-</header>
-
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Menu (Theo Slide 34) -->
-        <aside class="col-md-3 col-lg-2 sidebar">
-            <div class="user-panel">
-                <img src="https://ui-avatars.com/api/?name=${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}&background=0088cc&color=fff&size=128" alt="User Image">
-                <div class="mt-2 text-white fw-bold">${sessionScope.account != null ? sessionScope.account.fullName : 'Nguyễn Hữu Trung'}</div>
-                <div class="small text-success"><i class="fa fa-circle text-success me-1" style="font-size: 10px;"></i>Bạn là Admin</div>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/home">
-                        <i class="fa fa-gauge"></i> <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="${pageContext.request.contextPath}/admin/category/list" class="bg-primary text-white">
-                        <i class="fa fa-folder-open"></i> <span>Quản lý Danh mục</span>
-                    </a>
-                    <ul class="sub-menu">
-                        <li>
-                            <a href="${pageContext.request.contextPath}/admin/category/add" class="text-white">
-                                <i class="fa fa-plus me-1"></i> Thêm danh mục mới
-                            </a>
-                        </li>
-                        <li>
-                            <a href="${pageContext.request.contextPath}/admin/category/list" class="text-warning fw-bold">
-                                <i class="fa fa-list me-1"></i> Danh sách danh mục
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/product/list">
-                        <i class="fa fa-boxes"></i> <span>Quản lý Sản phẩm & Kho</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/home" target="_blank">
-                        <i class="fa fa-desktop"></i> <span>Xem Trang Bán Hàng</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/logout">
-                        <i class="fa fa-power-off text-danger"></i> <span>Đăng xuất</span>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="col-md-9 col-lg-10 content-wrapper">
-            
-            <!-- Page Title -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+<div>
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="fw-bold text-dark mb-1">Quản lý danh mục</h2>
                     <p class="text-muted mb-0">Nơi bạn có thể quản lý danh mục của mình (Xem, Thêm, Sửa, Xóa)</p>
@@ -295,12 +225,6 @@
                     <span>Hệ thống Quản lý Bán hàng Servlet JDBC &copy; 2026</span>
                 </div>
             </div>
-
-        </main>
-    </div>
 </div>
-
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

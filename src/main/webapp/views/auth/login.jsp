@@ -132,25 +132,28 @@
         
         <!-- Identifier: Username hoặc Email -->
         <div class="mb-3">
-            <label class="form-label text-secondary small fw-bold">Tài khoản / Email</label>
+            <label class="form-label text-secondary small fw-bold">Tài khoản / Email <span class="text-danger">*</span></label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fa fa-user"></i></span>
                 <input type="text" 
-                       class="form-control form-control-custom" 
+                       class="form-control form-control-custom ${not empty errors.username ? 'is-invalid' : ''}" 
                        id="username" 
                        name="username" 
                        value="<c:out value='${oldUsername}'/>"
                        placeholder="Nhập tên đăng nhập hoặc email" 
                        required 
+                       minlength="3"
                        autofocus>
+                <div class="invalid-feedback small ${not empty errors.username ? 'd-block' : 'd-none'}" id="usernameFeedback">
+                    ${not empty errors.username ? errors.username : 'Vui lòng nhập tài khoản hoặc email (tối thiểu 3 ký tự)!'}
+                </div>
             </div>
-            <div class="invalid-feedback small d-none" id="usernameFeedback">Vui lòng nhập tài khoản hoặc email!</div>
         </div>
 
         <!-- Mật khẩu kèm nút Ẩn/Hiện -->
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center">
-                <label class="form-label text-secondary small fw-bold mb-1">Mật khẩu</label>
+                <label class="form-label text-secondary small fw-bold mb-1">Mật khẩu <span class="text-danger">*</span></label>
                 <a href="${pageContext.request.contextPath}/forgot-password" class="text-primary small text-decoration-none" onclick="openForgotPasswordModal(event)">
                     Quên mật khẩu?
                 </a>
@@ -158,16 +161,19 @@
             <div class="input-group">
                 <span class="input-group-text"><i class="fa fa-lock"></i></span>
                 <input type="password" 
-                       class="form-control form-control-custom" 
+                       class="form-control form-control-custom ${not empty errors.password ? 'is-invalid' : ''}" 
                        id="password" 
                        name="password" 
-                       placeholder="Nhập mật khẩu" 
-                       required>
+                       placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" 
+                       required
+                       minlength="6">
                 <button type="button" class="btn btn-outline-secondary btn-toggle-pass" id="btnTogglePassword" tabindex="-1">
                     <i class="fa fa-eye" id="toggleIcon"></i>
                 </button>
+                <div class="invalid-feedback small ${not empty errors.password ? 'd-block' : 'd-none'}" id="passwordFeedback">
+                    ${not empty errors.password ? errors.password : 'Vui lòng nhập mật khẩu (tối thiểu 6 ký tự)!'}
+                </div>
             </div>
-            <div class="invalid-feedback small d-none" id="passwordFeedback">Vui lòng nhập mật khẩu!</div>
         </div>
 
         <!-- Ghi nhớ đăng nhập -->

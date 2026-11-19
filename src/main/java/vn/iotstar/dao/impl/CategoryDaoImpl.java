@@ -159,4 +159,37 @@ public class CategoryDaoImpl extends DBConnection implements CategoryDao {
         }
         return categories;
     }
+
+    @Override
+    public boolean checkExistName(String name) {
+        if (name == null || name.trim().isEmpty()) return false;
+        String sql = "SELECT 1 FROM Category WHERE LOWER(cate_name) = LOWER(?)";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkExistNameExcept(String name, int id) {
+        if (name == null || name.trim().isEmpty()) return false;
+        String sql = "SELECT 1 FROM Category WHERE LOWER(cate_name) = LOWER(?) AND cate_id <> ?";
+        try (Connection conn = super.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name.trim());
+            ps.setInt(2, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

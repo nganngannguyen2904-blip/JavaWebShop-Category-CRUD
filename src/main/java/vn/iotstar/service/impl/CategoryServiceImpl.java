@@ -102,4 +102,14 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> search(String keyword) {
         return categoryDao.search(keyword);
     }
+
+    @Override
+    public boolean checkExistName(String name) {
+        return categoryDao.checkExistName(name);
+    }
+
+    @Override
+    public boolean checkExistNameExcept(String name, int id) {
+        return categoryDao.checkExistNameExcept(name, id);
+    }
 }

@@ -51,4 +51,14 @@ public interface CategoryService {
      * Tìm kiếm danh mục
      */
     List<Category> search(String keyword);
+
+    /**
+     * Kiểm tra tên danh mục đã tồn tại
+     */
+    boolean checkExistName(String name);
+
+    /**
+     * Kiểm tra tên danh mục đã tồn tại (trừ ID hiện tại)
+     */
+    boolean checkExistNameExcept(String name, int id);
 }

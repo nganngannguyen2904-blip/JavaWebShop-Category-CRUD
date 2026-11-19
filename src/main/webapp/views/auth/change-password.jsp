@@ -33,21 +33,6 @@
 </head>
 <body>
 
-<!-- Header tóm tắt -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="${pageContext.request.contextPath}/home">
-            <i class="fa fa-shopping-bag me-2"></i>ShoppingService
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <span class="text-secondary small">Xin chào, <strong><c:out value="${sessionScope.account.fullName}"/></strong></span>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-sm btn-outline-danger">
-                <i class="fa fa-sign-out me-1"></i>Đăng xuất
-            </a>
-        </div>
-    </div>
-</nav>
-
 <div class="container flex-grow-1 d-flex align-items-center justify-content-center">
     <div class="change-pass-card">
         <div class="text-center mb-4">

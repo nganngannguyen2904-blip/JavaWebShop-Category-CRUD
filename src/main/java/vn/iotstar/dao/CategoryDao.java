@@ -43,4 +43,14 @@ public interface CategoryDao {
      * Tìm kiếm danh mục theo từ khóa
      */
     List<Category> search(String keyword);
+
+    /**
+     * Kiểm tra tên danh mục đã tồn tại hay chưa
+     */
+    boolean checkExistName(String name);
+
+    /**
+     * Kiểm tra tên danh mục đã tồn tại hay chưa (loại trừ ID danh mục hiện tại)
+     */
+    boolean checkExistNameExcept(String name, int id);
 }

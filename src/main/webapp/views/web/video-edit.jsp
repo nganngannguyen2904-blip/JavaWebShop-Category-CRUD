@@ -79,31 +79,6 @@
 </head>
 <body>
 
-<!-- Topbar Navigation -->
-<jsp:include page="/views/common/topbar.jsp" />
-
-<!-- Main Navbar -->
-<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary fs-4" href="${pageContext.request.contextPath}/home">
-            <i class="fa fa-shopping-bag me-2"></i>SHOPPING SERVICE
-        </a>
-        <div class="collapse navbar-collapse" id="navContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/home"><i class="fa fa-home me-1"></i>Trang Chủ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="${pageContext.request.contextPath}/products"><i class="fa fa-boxes me-1"></i>Sản Phẩm</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active fw-bold text-primary" href="${pageContext.request.contextPath}/video"><i class="fa fa-play-circle me-1"></i>Video Đa Phương Tiện</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -290,17 +265,6 @@
         </div>
     </div>
 </div>
-
-<!-- Footer -->
-<footer class="bg-dark text-white-50 py-4 mt-5">
-    <div class="container text-center small">
-        <p class="mb-1 text-white">Trường Đại học Sư phạm Kỹ thuật TP. Hồ Chí Minh (HCMUTE)</p>
-        <p class="mb-0">Môn học: Lập trình Web - GVHD: ThS. Nguyễn Hữu Trung</p>
-    </div>
-</footer>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Script xử lý Preview Video & Preview Ảnh bìa & Client Validation -->
 <script>

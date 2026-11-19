@@ -92,10 +92,23 @@ public class LoginController extends HttpServlet {
         String remember = req.getParameter("remember");
         boolean isRememberMe = "on".equals(remember);
 
-        // 1. Kiểm tra rỗng đầu vào
-        if (usernameOrEmail == null || usernameOrEmail.trim().isEmpty()
-                || password == null || password.isEmpty()) {
-            req.setAttribute("alert", "Tên đăng nhập / Email và mật khẩu không được để trống!");
+        // 1. Kiểm tra validation chi tiết phía Máy chủ (Server-side Validation)
+        java.util.Map<String, String> errors = new java.util.HashMap<>();
+        if (usernameOrEmail == null || usernameOrEmail.trim().isEmpty()) {
+            errors.put("username", "Tên đăng nhập hoặc email không được để trống!");
+        } else if (usernameOrEmail.trim().length() < 3) {
+            errors.put("username", "Tên đăng nhập hoặc email phải có tối thiểu 3 ký tự!");
+        }
+
+        if (password == null || password.isEmpty()) {
+            errors.put("password", "Mật khẩu không được để trống!");
+        } else if (password.length() < 6) {
+            errors.put("password", "Mật khẩu phải có tối thiểu 6 ký tự!");
+        }
+
+        if (!errors.isEmpty()) {
+            req.setAttribute("errors", errors);
+            req.setAttribute("alert", "Vui lòng kiểm tra lại thông tin đăng nhập!");
             req.setAttribute("alertType", "danger");
             req.setAttribute("oldUsername", usernameOrEmail != null ? usernameOrEmail.trim() : "");
             req.getRequestDispatcher(Constant.Path.LOGIN).forward(req, resp);
