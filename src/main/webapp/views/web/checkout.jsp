@@ -53,23 +53,6 @@
 </head>
 <body>
 
-<!-- Topbar Navigation -->
-<jsp:include page="/views/common/topbar.jsp" />
-
-<!-- Main Navbar -->
-<nav class="navbar navbar-expand-lg main-navbar sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary fs-4" href="${pageContext.request.contextPath}/home">
-            <i class="fa fa-shopping-bag me-2"></i>Shopping<span class="text-dark">Service</span>
-        </a>
-        <div class="d-flex align-items-center gap-2">
-            <a href="${pageContext.request.contextPath}/cart" class="btn btn-outline-primary btn-sm">
-                <i class="fa fa-arrow-left me-1"></i>Quay lại giỏ hàng
-            </a>
-        </div>
-    </div>
-</nav>
-
 <!-- Breadcrumb -->
 <div class="bg-white border-bottom py-2">
     <div class="container">
@@ -199,14 +182,5 @@
         </div>
     </form>
 </div>
-
-<!-- Footer -->
-<footer class="footer">
-    <div class="container text-center small text-secondary">
-        &copy; 2026 Shopping Service MVC. Mô hình MVC 3 lớp theo chuẩn tài liệu HCMUTE.
-    </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

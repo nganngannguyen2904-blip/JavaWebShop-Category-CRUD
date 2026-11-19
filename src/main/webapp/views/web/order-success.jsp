@@ -41,9 +41,6 @@
 </head>
 <body>
 
-<!-- Topbar Navigation -->
-<jsp:include page="/views/common/topbar.jsp" />
-
 <div class="container py-4">
     <div class="success-card text-center">
         <div class="mb-3">

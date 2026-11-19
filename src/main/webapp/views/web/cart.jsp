@@ -57,80 +57,6 @@
 </head>
 <body>
 
-<!-- Topbar Navigation -->
-<jsp:include page="/views/common/topbar.jsp" />
-
-<!-- Main Navbar -->
-<nav class="navbar navbar-expand-lg main-navbar sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary fs-4" href="${pageContext.request.contextPath}/home">
-            <i class="fa fa-shopping-bag me-2"></i>Shopping<span class="text-dark">Service</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="${pageContext.request.contextPath}/home">Trang chủ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="${pageContext.request.contextPath}/products">Sản phẩm</a>
-                </li>
-                <c:if test="${sessionScope.account != null && (sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2)}">
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold text-danger" href="${pageContext.request.contextPath}/admin/category/list">
-                            <i class="fa fa-cog me-1"></i>Quản trị Danh mục
-                        </a>
-                    </li>
-                </c:if>
-            </ul>
-
-            <div class="d-flex align-items-center gap-2">
-                <a href="${pageContext.request.contextPath}/cart" class="btn btn-primary btn-sm position-relative">
-                    <i class="fa fa-shopping-cart me-1"></i>Giỏ hàng
-                    <span class="badge bg-danger rounded-pill ms-1">${cart != null ? cart.totalQuantity : 0}</span>
-                </a>
-
-                <!-- User Auth Profile -->
-                <c:choose>
-                    <c:when test="${sessionScope.account != null}">
-                        <div class="dropdown ms-2">
-                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle fw-semibold d-flex align-items-center" type="button" data-bs-toggle="dropdown">
-                                <i class="fa fa-user-circle me-1 text-primary"></i>
-                                <span class="d-none d-md-inline"><c:out value="${sessionScope.account.fullName}"/></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                <li class="dropdown-header small text-muted">
-                                    <strong><c:out value="${sessionScope.account.userName}"/></strong>
-                                    (<span class="badge ${sessionScope.account.roleid == 1 ? 'bg-danger' : 'bg-primary'}">${sessionScope.account.roleid == 1 ? 'Admin' : 'Khách hàng'}</span>)
-                                </li>
-                                <c:if test="${sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2}">
-                                    <li><a class="dropdown-item text-danger fw-semibold" href="${pageContext.request.contextPath}/admin/home"><i class="fa fa-cogs me-2"></i>Trang Quản Trị</a></li>
-                                </c:if>
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/change-password"><i class="fa fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger fw-semibold" href="${pageContext.request.contextPath}/logout"><i class="fa fa-sign-out me-2"></i>Đăng xuất</a></li>
-                            </ul>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="d-flex align-items-center gap-1 ms-2">
-                            <a href="${pageContext.request.contextPath}/login" class="btn btn-sm btn-outline-primary fw-semibold">
-                                <i class="fa fa-sign-in me-1"></i>Đăng nhập
-                            </a>
-                            <a href="${pageContext.request.contextPath}/register" class="btn btn-sm btn-primary fw-semibold text-white">
-                                <i class="fa fa-user-plus me-1"></i>Đăng ký
-                            </a>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-    </div>
-</nav>
-
 <!-- Breadcrumb -->
 <div class="bg-white border-bottom py-2">
     <div class="container">
@@ -270,14 +196,5 @@
         </c:otherwise>
     </c:choose>
 </div>
-
-<!-- Footer -->
-<footer class="footer">
-    <div class="container text-center small text-secondary">
-        &copy; 2026 Shopping Service MVC. Mô hình MVC 3 lớp theo chuẩn tài liệu HCMUTE.
-    </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -82,66 +82,8 @@
 </head>
 <body>
 
-<!-- Admin Header Bar -->
-<header class="admin-topbar d-flex justify-content-between align-items-center shadow-sm">
-    <div class="d-flex align-items-center">
-        <h4 class="mb-0 fw-bold"><i class="fa fa-boxes me-2"></i>Quản Lý Sản Phẩm & Kho Hàng</h4>
-        <span class="ms-3 badge bg-light text-primary">Admin Control Panel</span>
-    </div>
-    <div class="d-flex align-items-center">
-        <span class="me-3">
-            <i class="fa fa-user-circle me-1"></i>
-            Xin chào, <strong>${sessionScope.account != null ? sessionScope.account.fullName : 'Admin'}</strong>
-        </span>
-        <a href="${pageContext.request.contextPath}/logout" class="btn btn-sm btn-danger px-3">
-            <i class="fa fa-sign-out-alt me-1"></i>Đăng xuất
-        </a>
-    </div>
-</header>
-
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar Menu -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar">
-            <div class="user-panel">
-                <img src="${pageContext.request.contextPath}/image?fname=${sessionScope.account.avatar}" 
-                     alt="Avatar" onerror="this.src='https://placehold.co/100x100?text=Admin';">
-                <h6 class="text-white mt-2 mb-1">${sessionScope.account != null ? sessionScope.account.fullName : 'Administrator'}</h6>
-                <small class="text-success"><i class="fa fa-circle text-success me-1"></i>Đang trực tuyến</small>
-            </div>
-
-            <ul class="sidebar-menu">
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/home">
-                        <i class="fa fa-tachometer-alt me-2"></i>Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/admin/category/list">
-                        <i class="fa fa-th-large me-2"></i>Quản lý Danh mục
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="${pageContext.request.contextPath}/admin/product/list">
-                        <i class="fa fa-boxes me-2 text-primary"></i>Quản lý Sản phẩm & Kho
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/home" target="_blank">
-                        <i class="fa fa-store me-2"></i>Xem Trang Bán Hàng
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/logout" class="text-danger">
-                        <i class="fa fa-sign-out-alt me-2"></i>Đăng xuất
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <!-- Thống kê kho hàng -->
+<div>
+    <!-- Thống kê kho hàng -->
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
                     <div class="stat-card-sm" style="border-left-color: #0d6efd;">
@@ -266,10 +208,6 @@
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

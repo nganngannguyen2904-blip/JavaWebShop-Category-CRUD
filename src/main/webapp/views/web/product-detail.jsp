@@ -95,89 +95,6 @@
 </head>
 <body>
 
-<!-- 1. Topbar Navigation -->
-<jsp:include page="/views/common/topbar.jsp" />
-
-<!-- 2. Main Navbar -->
-<nav class="navbar navbar-expand-lg main-navbar sticky-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold text-primary fs-4" href="${pageContext.request.contextPath}/home">
-            <i class="fa fa-shopping-bag me-2"></i>Shopping<span class="text-dark">Service</span>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="${pageContext.request.contextPath}/home">Trang chủ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active fw-semibold text-primary" href="${pageContext.request.contextPath}/products">Sản phẩm</a>
-                </li>
-                <c:if test="${sessionScope.account != null && (sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2)}">
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold text-danger" href="${pageContext.request.contextPath}/admin/category/list">
-                            <i class="fa fa-cog me-1"></i>Quản trị Danh mục
-                        </a>
-                    </li>
-                </c:if>
-            </ul>
-
-            <div class="d-flex align-items-center gap-2">
-                <form class="d-flex" action="${pageContext.request.contextPath}/products" method="get">
-                    <div class="input-group">
-                        <input class="form-control form-control-sm" type="search" name="keyword" placeholder="Tìm kiếm sản phẩm..." aria-label="Search">
-                        <button class="btn btn-outline-primary btn-sm" type="submit"><i class="fa fa-search"></i></button>
-                    </div>
-                </form>
-
-                <a href="${pageContext.request.contextPath}/cart" class="btn btn-outline-primary btn-sm position-relative ms-2" title="Xem giỏ hàng">
-                    <i class="fa fa-shopping-cart"></i>
-                    <c:if test="${sessionScope.cart != null && sessionScope.cart.totalQuantity > 0}">
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${sessionScope.cart.totalQuantity}</span>
-                    </c:if>
-                </a>
-
-                <!-- User Auth Profile -->
-                <c:choose>
-                    <c:when test="${sessionScope.account != null}">
-                        <div class="dropdown ms-2">
-                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle fw-semibold d-flex align-items-center" type="button" data-bs-toggle="dropdown">
-                                <i class="fa fa-user-circle me-1 text-primary"></i>
-                                <span class="d-none d-md-inline"><c:out value="${sessionScope.account.fullName}"/></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                <li class="dropdown-header small text-muted">
-                                    <strong><c:out value="${sessionScope.account.userName}"/></strong>
-                                    (<span class="badge ${sessionScope.account.roleid == 1 ? 'bg-danger' : 'bg-primary'}">${sessionScope.account.roleid == 1 ? 'Admin' : 'Khách hàng'}</span>)
-                                </li>
-                                <c:if test="${sessionScope.account.roleid == 1 || sessionScope.account.roleid == 2}">
-                                    <li><a class="dropdown-item text-danger fw-semibold" href="${pageContext.request.contextPath}/admin/home"><i class="fa fa-cogs me-2"></i>Trang Quản Trị</a></li>
-                                </c:if>
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/change-password"><i class="fa fa-key me-2 text-warning"></i>Đổi mật khẩu</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger fw-semibold" href="${pageContext.request.contextPath}/logout"><i class="fa fa-sign-out me-2"></i>Đăng xuất</a></li>
-                            </ul>
-                        </div>
-                    </c:when>
-                    <c:otherwise>
-                        <div class="d-flex align-items-center gap-1 ms-2">
-                            <a href="${pageContext.request.contextPath}/login" class="btn btn-sm btn-outline-primary fw-semibold">
-                                <i class="fa fa-sign-in me-1"></i>Đăng nhập
-                            </a>
-                            <a href="${pageContext.request.contextPath}/register" class="btn btn-sm btn-primary fw-semibold text-white">
-                                <i class="fa fa-user-plus me-1"></i>Đăng ký
-                            </a>
-                        </div>
-                    </c:otherwise>
-                </c:choose>
-            </div>
-        </div>
-    </div>
-</nav>
-
 <!-- 3. Breadcrumb -->
 <div class="bg-white border-bottom py-2">
     <div class="container">
@@ -399,15 +316,6 @@
     </div>
 </div>
 
-<!-- Footer -->
-<footer class="footer">
-    <div class="container text-center small">
-        <p class="mb-1">&copy; 2026 Shopping Service MVC. Mô hình MVC 3 lớp kết nối SQL Server.</p>
-        <p class="text-secondary mb-0">GVHD: ThS. Nguyễn Hữu Trung - Trường ĐH Sư Phạm Kỹ Thuật TP.HCM (HCMUTE)</p>
-    </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     function changeQty(delta) {
         let input = document.getElementById('buyQty');

@@ -30,4 +30,14 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- Cấu hình Sitemesh Decorator 3 WebFilter (org.sitemesh:sitemesh-webfilter:3.3.0) -->
+    <filter>
+        <filter-name>sitemesh</filter-name>
+        <filter-class>org.sitemesh.config.ConfigurableSiteMeshFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
 </web-app>
