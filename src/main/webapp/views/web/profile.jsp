@@ -45,6 +45,32 @@
                     <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle p-2" title="Tài khoản đang hoạt động">
                         <span class="visually-hidden">Online</span>
                     </span>
+                    <!-- Loading Overlay khi đang upload lên Cloudinary -->
+                    <div id="avatarLoadingOverlay" class="position-absolute top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 rounded-circle d-none flex-column align-items-center justify-content-center text-white" style="backdrop-filter: blur(2px);">
+                        <div class="spinner-border spinner-border-sm text-primary mb-1" role="status"></div>
+                        <span class="fw-semibold" style="font-size: 0.7rem;">Đang tải lên...</span>
+                    </div>
+                </div>
+
+                <!-- Huy hiệu nhận diện nguồn lưu trữ Cloudinary -->
+                <div class="mb-2">
+                    <c:choose>
+                        <c:when test="${user.avatar != null && user.avatar.contains('cloudinary')}">
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small" title="Ảnh đại diện được lưu trữ trực tuyến an toàn trên máy chủ Cloudinary CDN">
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i> Lưu trữ Cloudinary CDN
+                            </span>
+                            <div class="mt-1">
+                                <a href="${user.avatar}" target="_blank" rel="noopener noreferrer" class="small text-decoration-none text-muted" style="font-size: 0.72rem;">
+                                    <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Xem ảnh gốc Cloudinary
+                                </a>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-1 rounded-pill small">
+                                <i class="fa-solid fa-image me-1"></i> Ảnh đại diện cục bộ
+                            </span>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
 
                 <h4 class="fw-bold text-dark mb-1">${user.fullName}</h4>
@@ -75,7 +101,7 @@
                     <small class="text-muted d-block" style="font-size: 0.75rem;">Hỗ trợ PNG, JPG, WEBP (Tối đa 10MB)<br>Upload tự động đồng bộ lên Cloudinary</small>
                 </form>
 
-                <div class="card bg-light border-0 rounded-3 text-start p-3 mt-4 small">
+                <div class="card bg-light border-0 rounded-3 text-start p-3 mt-3 small">
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted"><i class="fa fa-calendar-alt me-1"></i>Ngày tham gia:</span>
                         <strong class="text-dark">${user.createdDate != null ? user.createdDate : '09/11/2026'}</strong>
@@ -84,9 +110,36 @@
                         <span class="text-muted"><i class="fa fa-shield me-1"></i>Trạng thái:</span>
                         <span class="text-success fw-bold"><i class="fa fa-check-circle me-1"></i>Bình thường</span>
                     </div>
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="text-muted"><i class="fa fa-envelope me-1"></i>Email:</span>
-                        <span class="text-dark text-truncate ms-2" style="max-width: 140px;">${user.email}</span>
+                        <div class="d-flex align-items-center">
+                            <span class="text-dark text-truncate ms-2" style="max-width: 130px;" title="${user.email}">${user.email}</span>
+                            <button type="button" class="btn btn-link btn-sm p-0 ms-1 text-muted" onclick="navigator.clipboard.writeText('${user.email}'); this.innerHTML='<i class=\'fa fa-check text-success\'></i>'; setTimeout(() => this.innerHTML='<i class=\'fa-regular fa-copy\'></i>', 2000);" title="Sao chép email">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted"><i class="fa fa-phone me-1"></i>Số điện thoại:</span>
+                        <strong class="text-dark">${not empty user.phone ? user.phone : 'Chưa cập nhật'}</strong>
+                    </div>
+                </div>
+
+                <!-- Thống kê nhanh hoạt động tài khoản -->
+                <div class="row g-2 mt-2 text-center">
+                    <div class="col-6">
+                        <a href="${pageContext.request.contextPath}/cart" class="text-decoration-none d-block p-2 border rounded-3 bg-white shadow-sm h-100">
+                            <i class="fa-solid fa-cart-shopping text-primary mb-1"></i>
+                            <div class="text-muted" style="font-size: 0.72rem;">Giỏ hàng</div>
+                            <div class="fw-bold text-dark small">${sessionScope.cart != null ? sessionScope.cart.totalQuantity : 0} món</div>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 border rounded-3 bg-white shadow-sm h-100">
+                            <i class="fa-solid fa-shield-halved text-success mb-1"></i>
+                            <div class="text-muted" style="font-size: 0.72rem;">Bảo mật OTP</div>
+                            <div class="fw-bold text-success small">Đã bật</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -337,6 +390,11 @@
 
             // Tự động submit form tải ảnh lên Cloudinary
             if (confirm('Bạn có chắc chắn muốn cập nhật ảnh đại diện này lên Cloudinary?')) {
+                const overlay = document.getElementById('avatarLoadingOverlay');
+                if (overlay) {
+                    overlay.classList.remove('d-none');
+                    overlay.classList.add('d-flex');
+                }
                 document.getElementById('avatarForm').submit();
             }
         }
